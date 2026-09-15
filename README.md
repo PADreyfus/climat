@@ -75,9 +75,10 @@ Quand ce pic franchit le seuil d'un point de bascule — récifs et calottes à 
 glaciers à 2 °C, Amazonie à 3,5 °C, AMOC à 4 °C — la carte se verrouille et **ne se
 déverrouille plus** : un cadenas apparaît, et l'élément garde un plancher dans le modèle.
 
-Poussez *Croissance fossile*, revenez à *Neutralité* : la température redescend à
-+1,5 °C, les canicules perdent 73 % — et les famines ne reculent que de 11 %. C'est
-l'overshoot montré en trois gestes. Le bouton ↺ efface la mémoire pour rejouer.
+Cette mémoire ne vaut que pour vos propres réglages : montez le transport à fond puis
+redescendez-le, les verrous franchis au passage restent fermés. Charger un autre scénario
+repart d'un monde neuf, comme le bouton ↺ — chaque scénario montre donc les seuils qu'il
+franchit lui-même.
 
 ### Ce que ça vaut, ce que ça ne vaut pas
 

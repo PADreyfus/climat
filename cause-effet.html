@@ -1025,10 +1025,10 @@ function buildSheet(){
     <div class="val"><div class="n" id="sh-n"></div><div class="c" id="sh-c"></div></div>
     ${lev}
     <p class="desc">${esc(n.d)}</p>
-    <div class="ghdr">Ce que ça veut dire</div><div class="mean" id="sh-mean"></div>
-    ${(n.b||n.x)?'<p class="note">Carte ajoutée en complément des 42 cartes officielles.</p>':""}
     ${ins?`<div class="ghdr">Ce qui la provoque</div><div class="grp">${ins}</div>`:""}
-    ${outs?`<div class="ghdr">Ce qu'elle provoque</div><div class="grp">${outs}</div>`:""}`;
+    ${outs?`<div class="ghdr">Ce qu'elle provoque</div><div class="grp">${outs}</div>`:""}
+    <div class="ghdr">Ce que ça veut dire</div><div class="mean" id="sh-mean"></div>
+    ${(n.b||n.x)?'<p class="note">Carte ajoutée en complément des 42 cartes officielles.</p>':""}`;
   SR={n:$("sh-n"),c:$("sh-c"),sl:$("sl"),slv:$("sl-v"),mean:$("sh-mean"),
       rows:[...body.querySelectorAll("[data-v]")].map(el=>({el,id:+el.dataset.v}))};
   $("sh-x").onclick=close;
@@ -1069,6 +1069,7 @@ function buildLockSheet(){
     <div class="val"><div class="n" style="color:${p.locked.length?"var(--warm)":"var(--ink)"}">${p.locked.length} / ${LOCKS.length}</div>
       <div class="c">verrous franchis · pic atteint +${fr(PEAK)} °C</div></div>
     <p class="desc">${p.fbWarm>.015?`Les boucles qui se sont enclenchées ajoutent à elles seules <b>+${fr(p.fbWarm,2)} °C</b> que plus personne ne pilote.<br><br>`:""}Un seuil franchi ne se rouvre pas en redescendant : la boucle qui s'est enclenchée n'a plus besoin de nous pour continuer. C'est la mémoire de cette simulation — elle retient le point le plus chaud atteint, pas celui où vous êtes maintenant.</p>
+    <p class="note" style="margin:10px 0 0">Cette mémoire se garde tant que vous réglez les cartes à la main. Elle repart de zéro quand vous chargez un autre scénario, ou avec le bouton ↺.</p>
     <div class="grp" style="padding:2px 0">${rows}</div>
     <p class="note">Seuils : valeur centrale de l'évaluation d'Armstrong McKay <em>et al.</em> (Science, 2022). Les fourchettes sont larges — de 0,8 à 3 °C pour le Groenland, de 1,4 à 8 °C pour l'AMOC. On sait que ces portes existent, pas exactement où sont les poignées.</p>`;
   $("sh-x").onclick=close;
@@ -1092,7 +1093,11 @@ PRESETS.forEach((p,i)=>{const b=document.createElement("button");
     .replace("Sobriété + renouvelables","Sobriété").replace("Neutralité carbone","Neutralité")
     .replace("Tout sur la technologie","Techno").replace("Croissance fossile","Fossile");
   b.setAttribute("aria-pressed",i===0?"true":"false");
-  b.onclick=()=>{LEVERS.forEach(l=>S[l.k]=p.s[l.k]??l.def);markScen(i);apply(1);};
+  b.onclick=()=>{
+    LEVERS.forEach(l=>S[l.k]=p.s[l.k]??l.def);
+    PEAK=0; LOCKED.clear(); boot=true;      /* changer de scénario, c'est charger un autre monde */
+    markScen(i); apply(1);
+  };
   SC.appendChild(b);});
 const perso=document.createElement("button");
 perso.textContent="Perso"; perso.setAttribute("aria-pressed","true");

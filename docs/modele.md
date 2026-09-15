@@ -137,10 +137,10 @@ sont larges** — 0,8 à 3 °C pour le Groenland, 1,4 à 8 °C pour l'AMOC. Les 
 sont des choix d'auteur : ils traduisent « on ne redescend plus en dessous », pas une
 amplitude mesurée.
 
-Conséquence pédagogique : passez en *Croissance fossile* puis revenez en *Neutralité*,
-la température redescend à +1,5 °C, les canicules perdent 73 % — et les famines ne
-reculent que de 11 %, parce que ce qui a été cassé ne se répare pas. C'est l'overshoot,
-en trois gestes.
+La mémoire ne court que sur vos propres réglages : poussez un curseur au maximum puis
+ramenez-le, les seuils franchis au passage restent fermés — ce qui a été cassé ne se
+répare pas. Charger un scénario, en revanche, charge un monde neuf et remet la mémoire à
+zéro : chaque scénario affiche les seuils qu'il franchit lui-même, ni plus ni moins.
 
 Le bouton ↺ remet les curseurs au plus bas **et efface la mémoire**, pour rejouer depuis
 un climat où aucun seuil n'est franchi.
