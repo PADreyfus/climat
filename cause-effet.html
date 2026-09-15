@@ -58,12 +58,12 @@ svg#board{display:block;width:100%;height:100%}
 
 /* ---------- chiffre principal ---------- */
 #hero{position:fixed;left:16px;top:calc(16px + env(safe-area-inset-top,0px));z-index:4;
-  border-radius:var(--rl);padding:13px 18px 14px;width:max-content;max-width:min(330px,calc(100vw - 32px))}
+  border-radius:var(--rl);padding:13px 18px 14px;width:max-content;max-width:min(310px,calc(100vw - 32px))}
 #hero .t{font-size:44px;font-weight:600;letter-spacing:-.035em;line-height:1;display:block}
 #hero .u{font-size:13px;color:var(--ink-2);margin-top:5px}
 #hero .b{font-size:13px;color:var(--ink-2);margin-top:9px;padding-top:9px;border-top:.5px solid var(--hair)}
 #hero .b b{color:var(--ink);font-weight:600}
-#hero button{display:block;width:100%;text-align:left;font:inherit;color:inherit}
+#hero > button{display:block;width:100%;text-align:left;font:inherit;color:inherit}
 #h-main{cursor:pointer}
 #h-main:active{transform:scale(.99)}
 #h-l{display:flex;align-items:center;gap:7px;margin-top:10px;padding-top:9px;border-top:.5px solid var(--hair);
@@ -91,6 +91,19 @@ svg#board{display:block;width:100%;height:100%}
 .lockrow .t em{display:block;font-style:normal;font-weight:400;font-size:12.5px;color:var(--ink-3);margin-top:2px;line-height:1.4}
 .lockrow .st{margin-left:auto;flex:none;color:var(--ink-3)}
 .lockrow.hot .st{color:var(--warm)}
+#h-out{margin-top:11px;padding-top:10px;border-top:.5px solid var(--hair)}
+#out-h{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:650;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--ink-3);cursor:pointer;width:100%}
+#out-h .chev{margin-left:auto;transition:transform .3s var(--ease);font-size:13px;line-height:1}
+#hero.closed #out-h .chev{transform:rotate(180deg)}
+#hero.closed #out-list{display:none}
+#out-list{margin-top:7px;display:flex;flex-direction:column;gap:1px}
+.orow{display:flex;gap:9px;align-items:baseline;padding:5px 6px;margin:0 -6px;border-radius:8px;
+  width:calc(100% + 12px);text-align:left;cursor:pointer}
+.orow:hover{background:var(--fill)}
+.orow b{font-size:15px;font-weight:650;letter-spacing:-.01em;flex:none;min-width:78px;text-align:right}
+.orow span{font-size:12px;color:var(--ink-2);line-height:1.3}
+.orow span em{display:block;font-style:normal;font-size:11.5px;color:var(--ink-3);margin-top:1px}
 #hero .chip{display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;
   background:var(--fill);margin-left:7px;vertical-align:3px}
 
@@ -211,6 +224,10 @@ svg .ic{color:var(--ink-3)}
     <div class="b" id="h-b"></div>
   </button>
   <button id="h-l" title="Les seuils franchis"></button>
+  <div id="h-out">
+    <button id="out-h" aria-expanded="true">Ce que ça coûte<span class="chev">⌃</span></button>
+    <div id="out-list"></div>
+  </div>
 </div>
 
 <div id="toast" role="status"></div>
@@ -223,7 +240,7 @@ svg .ic{color:var(--ink-3)}
   <button id="t-fit" class="glass" aria-pressed="false" title="Tout voir">⤢</button>
 </div>
 
-<div id="hint">Touchez une carte · réglez les causes avec − et + · certains seuils ne se rouvrent pas</div>
+<div id="hint">Survolez une carte pour isoler sa chaîne · cliquez pour la fiche · − et + pour régler</div>
 
 <aside id="sheet" aria-live="polite">
   <div id="grab"></div>
@@ -689,7 +706,7 @@ EDGES.forEach(e=>{const s=byId[e.a],t=byId[e.b]; if(!s||!t)return;
 const C={};
 NODES.forEach(n=>{
   const g=el("g",{class:"card"+(n.b?" opt":""),transform:`translate(${X(n)},${Y(n)})`,tabindex:"0",role:"button"});
-  g.appendChild(el("title",{})).textContent=n.n;
+  g.appendChild(el("title",{})).textContent=n.n+" — "+n.d;
   g.appendChild(el("rect",{class:"bg",width:CW,height:CH,rx:13}));
   const tint=el("rect",{class:"tint",width:CW,height:CH,rx:13,opacity:0,"pointer-events":"none"}); g.appendChild(tint);
   g.appendChild(el("use",{href:"#ic-"+n.id,x:12,y:60,width:23,height:23,class:"ic"}));
@@ -716,6 +733,10 @@ NODES.forEach(n=>{
   }
   gN.appendChild(g);
   C[n.id]={g,tint,v,fld,stp,fv,sv,lk};
+  g.addEventListener("pointerenter",()=>{hover=n.id;applyDim();});
+  g.addEventListener("pointerleave",()=>{if(hover===n.id){hover=null;applyDim();}});
+  g.addEventListener("focus",()=>{hover=n.id;applyDim();});
+  g.addEventListener("blur",()=>{if(hover===n.id){hover=null;applyDim();}});
   g.addEventListener("click",ev=>{ev.stopPropagation();select(n.id);});
   g.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();select(n.id);}});
 });
@@ -738,19 +759,33 @@ function lerp(a,b,t){const o={p:{},idx:{}};
     o.p[k]=(typeof bv==="number"&&typeof av==="number")?av+(bv-av)*t:bv;}
   for(const k in b.idx){const v=a.idx[k]===undefined?1:a.idx[k];o.idx[k]=v+(b.idx[k]-v)*t;}
   return o;}
-function refreshChain(){
-  if(sel==null){chain=null;return;}
-  const walk=dir=>{const seen=new Set(),q=[sel];
-    while(q.length){const id=q.pop();
-      for(const e of (dir==="up"?IN[id]:OUT[id])){
+let hover=null;
+const focusId=()=>hover!=null?hover:sel;
+function chainFor(id){
+  if(id==null)return null;
+  const walk=dir=>{const seen=new Set(),q=[id];
+    while(q.length){const cur=q.pop();
+      for(const e of (dir==="up"?IN[cur]:OUT[cur])){
         if(!liveEdge(e)||e.fb)continue;
         const nx=dir==="up"?e.a:e.b;
-        if(nx!==sel&&!seen.has(nx)){seen.add(nx);q.push(nx);} } }
+        if(nx!==id&&!seen.has(nx)){seen.add(nx);q.push(nx);} } }
     return seen;};
   const up=walk("up"),down=walk("down");
-  chain={nodes:new Set([sel,...up,...down]),
-    edge:e=>((up.has(e.a)||e.a===sel)&&(up.has(e.b)||e.b===sel))||
-            ((down.has(e.a)||e.a===sel)&&(down.has(e.b)||e.b===sel))};
+  return {nodes:new Set([id,...up,...down]),
+    edge:e=>((up.has(e.a)||e.a===id)&&(up.has(e.b)||e.b===id))||
+            ((down.has(e.a)||e.a===id)&&(down.has(e.b)||e.b===id))};
+}
+function refreshChain(){ chain=chainFor(focusId()); }
+function applyDim(){
+  refreshChain();
+  const f=focusId();
+  NODES.forEach(n=>C[n.id].g.classList.toggle("dim",!!chain&&!chain.nodes.has(n.id)));
+  edgeEls.forEach(({e,p})=>{
+    const hot=f!=null&&(e.a===f||e.b===f);
+    p.classList.toggle("hot",hot);
+    p.setAttribute("marker-end",hot?"url(#arh)":"url(#ar)");
+    p.classList.toggle("dim",!!chain&&!hot&&!chain.edge(e));
+  });
 }
 const LOCKED=new Set();
 let boot=true;
@@ -831,15 +866,9 @@ function draw(s){
     c.lk.style.display=LOCKED.has(n.id)?"":"none";
     c.g.classList.toggle("locked",LOCKED.has(n.id));
     c.g.classList.toggle("sel",n.id===sel);
-    c.g.classList.toggle("dim",!!chain&&!chain.nodes.has(n.id));
+
   });
-  edgeEls.forEach(({e,p})=>{
-    p.style.display=liveEdge(e)?"":"none";
-    const hot=sel!=null&&(e.a===sel||e.b===sel);
-    p.classList.toggle("hot",hot);
-    p.setAttribute("marker-end",hot?"url(#arh)":"url(#ar)");
-    p.classList.toggle("dim",!!chain&&!hot&&!chain.edge(e));
-  });
+  edgeEls.forEach(({e,p})=>{ p.style.display=liveEdge(e)?"":"none"; });
   const p=s.p, dd=p.dT-REF.dt;
   $("h-t").textContent="+"+fr(p.dT)+" °C";
   $("h-u").innerHTML="en 2100"+(Math.abs(dd)<.015?", au rythme actuel":
@@ -851,6 +880,7 @@ function draw(s){
     `<span><b>${nl} verrou${nl>1?"s":""}</b> franchi${nl>1?"s":""}</span>`
     :`<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="#ic-lock"/></svg><span>Aucun seuil franchi</span>`;
   $("h-l").classList.toggle("on",nl>0);
+  drawOut(s);
 }
 
 const COL={warm:"var(--warm)",cool:"var(--cool)",ink3:"var(--ink-3)"};
@@ -963,6 +993,42 @@ const DYN={
    return `Un été de type 2003 revient ici <b>${r<1.3?"presque chaque année":"environ une année sur "+Math.round(r)}</b>. Ce qui était exceptionnel devient la normale — et le nouvel exceptionnel se situe bien plus haut.`;},
  41:s=>`≈ ${fr(s.p.perma*1.6)} Gt de CO₂e s'échappent chaque année des sols dégelés : l'équivalent de ${Math.round(s.p.perma*1.6/.4)} fois les émissions annuelles de la France, sans qu'aucun humain n'y soit pour quelque chose.`
 };
+/* ---- les sorties sensibles, celles qu'on regarde en premier ---- */
+const interp=(x,pts)=>{
+  if(x<=pts[0][0])return pts[0][1];
+  for(let i=1;i<pts.length;i++) if(x<=pts[i][0]){
+    const[a,va]=pts[i-1],[b,vb]=pts[i]; return va+(vb-va)*(x-a)/(b-a); }
+  return pts[pts.length-1][1];
+};
+/* part des espèces à très haut risque d'extinction — GIEC AR6, ordre de grandeur */
+const especes=dT=>interp(dT,[[1,4],[1.5,9],[2,14],[3,19],[4,29],[5,39]]);
+const recifs=dT=>Math.min(99,Math.max(20,50+60*(dT-1.2)));
+const IMPACT=[
+ {go:25,n:s=>especes(s.p.dT), f:v=>Math.round(v)+" %", l:"des espèces menacées d'extinction"},
+ {go:22,n:s=>s.p.slr*100, f:v=>"+"+Math.round(v)+" cm", l:"de niveau marin en 2100",
+  sub:s=>md(exposes(s.p.slr+1))+" de personnes sous la ligne de tempête · "+
+    (()=>{const l=LIEUX.slice().sort((a,b)=>a.a-b.a)[0];return l.n+" : "+Math.round((l.a-s.p.slr)*100)+" cm de marge";})()},
+ {go:32,n:s=>cereale(s.p.dT), f:v=>"−"+Math.round(v)+" %", l:"de récoltes mondiales",
+  sub:s=>{const g=2800*cereale(s.p.dT)/100*1e9/150/1e6; return "la ration annuelle de "+md(g)+" de personnes";}},
+ {go:36,n:s=>niche(s.p.dT), f:v=>v<60?"< 100 M":md(v), l:"de personnes hors de la zone climatique habitable"},
+ {go:27,n:s=>recifs(s.p.dT), f:v=>Math.round(v)+" %", l:"des récifs coralliens perdus"},
+ {go:37,n:s=>s.idx[37], f:v=>sgn(Math.round((v-1)*100))+" %", l:"de risque de famine", rel:1},
+ {go:40,n:s=>s.idx[40], f:v=>sgn(Math.round((v-1)*100))+" %", l:"de risque de conflit armé", rel:1}
+];
+let OUTREF=null;
+function drawOut(s){
+  const box=$("out-list"); if(!box)return;
+  const vals=IMPACT.map(o=>o.n(s));
+  if(!OUTREF) OUTREF=vals.slice();
+  box.innerHTML=IMPACT.map((o,i)=>{
+    const v=vals[i], r=OUTREF[i], d=Math.abs(r)>1e-9?(v-r)/Math.abs(r):v-r;
+    const col=Math.abs(d)<.01?"var(--ink)":(d>0?"var(--warm)":"var(--cool)");
+    return `<button class="orow" data-go="${o.go}"><b style="color:${col}">${o.f(v)}</b>`+
+      `<span>${o.l}${o.sub?`<em>${o.sub(s)}</em>`:""}</span></button>`;
+  }).join("");
+  box.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>select(+b.dataset.go));
+}
+
 /* des vies plutôt que des pourcentages */
 const md=v=>v>=1000?fr(v/1000,1)+" milliard"+(v>=2000?"s":""):Math.round(v)+" millions";
 const niche=dT=>Math.max(0,(dT-1.4))*750;              /* hors de la niche climatique humaine */
@@ -1075,14 +1141,14 @@ function buildLockSheet(){
   $("sh-x").onclick=close;
 }
 function openLocks(){
-  mode="locks"; sel=null; refreshChain(); draw(cur); buildLockSheet();
+  mode="locks"; sel=null; hover=null; refreshChain(); draw(cur); applyDim(); buildLockSheet();
   sheetEl.classList.add("on"); $("tools").classList.add("shift"); SC.classList.add("shift");
 }
 function select(id){
-  mode="card"; sel=id; refreshChain(); draw(cur); buildSheet();
+  mode="card"; sel=id; hover=null; refreshChain(); draw(cur); applyDim(); buildSheet();
   sheetEl.classList.add("on"); $("tools").classList.add("shift"); SC.classList.add("shift"); ensureVisible(id);
 }
-function close(){ mode="card"; sel=null; refreshChain(); draw(cur); sheetEl.classList.remove("on"); $("tools").classList.remove("shift"); SC.classList.remove("shift"); }
+function close(){ mode="card"; sel=null; refreshChain(); draw(cur); applyDim(); sheetEl.classList.remove("on"); $("tools").classList.remove("shift"); SC.classList.remove("shift"); }
 
 /* ============================================================
    SCÉNARIOS ET OUTILS
@@ -1111,7 +1177,7 @@ function markScen(i){
 $("t-opt").onclick=()=>{showOpt=!showOpt;
   $("t-opt").setAttribute("aria-pressed",showOpt?"true":"false");
   if(!showOpt&&sel!=null&&byId[sel].b)close();
-  refreshChain(); apply(null,true);};
+  refreshChain(); apply(null,true); applyDim();};
 $("t-reset").onclick=()=>{
   LEVERS.forEach(l=>S[l.k]=0); S.low=90; S.sink=130; S.ccs=1;
   PEAK=0; LOCKED.clear(); markScen(); boot=true; apply(1);
@@ -1130,7 +1196,10 @@ let k=1,tx=0,ty=0;
 const T=()=>gW.setAttribute("transform",`translate(${tx},${ty}) scale(${k})`);
 const box=()=>{const r=stage.getBoundingClientRect();
   board.setAttribute("viewBox",`0 0 ${r.width} ${r.height}`);return r;};
-function home(){const r=box();k=clamp((r.height-24)/900,.5,1.05);tx=-20*k;ty=-14*k;T();if(sel!=null)ensureVisible(sel);}
+function home(){const r=box();k=clamp((r.height-24)/900,.5,1.05);
+  const hero=$("hero").getBoundingClientRect();
+  tx=r.width>860?hero.width+26:-20*k;      /* le plateau démarre à droite du bandeau */
+  ty=-14*k;T(); if(sel!=null)ensureVisible(sel);}
 function fit(){const r=box();k=Math.min(r.width/VW,r.height/VH)*.95;
   tx=(r.width-VW*k)/2;ty=(r.height-VH*k)/2;T();}
 function ensureVisible(id){
@@ -1144,12 +1213,14 @@ function ensureVisible(id){
 function zoom(f,cx,cy){const r=stage.getBoundingClientRect();
   cx=cx??r.width/2;cy=cy??r.height/2;
   const nk=clamp(k*f,.14,2.6);tx=cx-(cx-tx)*nk/k;ty=cy-(cy-ty)*nk/k;k=nk;T();}
-const pts=new Map(); let g0=null,moved=0;
+const pts=new Map(); let g0=null,moved=0,captured=false;
+const grab=e=>{ if(captured)return;
+  try{stage.setPointerCapture(e.pointerId);}catch(_){}
+  captured=true; stage.classList.add("drag"); };
 stage.addEventListener("pointerdown",e=>{
   pts.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;
-  stage.setPointerCapture(e.pointerId);stage.classList.add("drag");
   if(pts.size===2){const[a,b]=[...pts.values()];
-    g0={d:Math.hypot(a.x-b.x,a.y-b.y),k};}
+    g0={d:Math.hypot(a.x-b.x,a.y-b.y),k}; grab(e);}
 });
 stage.addEventListener("pointermove",e=>{
   const p=pts.get(e.pointerId); if(!p)return;
@@ -1161,11 +1232,13 @@ stage.addEventListener("pointermove",e=>{
       zoom((d/g0.d)*(g0.k/k),(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top);g0.d=d;g0.k=k;}
     return;}
   moved+=Math.abs(dx)+Math.abs(dy);
+  if(moved<5)return;                       /* sous ce seuil, c'est un clic, pas un glissé */
+  grab(e);
   tx+=dx;ty+=dy;p.x=e.clientX;p.y=e.clientY;T();
 });
 ["pointerup","pointercancel"].forEach(t=>stage.addEventListener(t,e=>{
   pts.delete(e.pointerId); if(pts.size<2)g0=null;
-  if(!pts.size){stage.classList.remove("drag");
+  if(!pts.size){stage.classList.remove("drag");captured=false;
     if(moved<5&&(e.target===stage||e.target===board||e.target.id==="world"))close();}
 }));
 stage.addEventListener("wheel",e=>{e.preventDefault();const r=stage.getBoundingClientRect();
@@ -1175,8 +1248,11 @@ addEventListener("resize",()=>box());
 addEventListener("keydown",e=>{if(e.key==="Escape")close();});
 
 $("h-main").onclick=()=>select(21);
+$("out-h").onclick=()=>{const h=$("hero"),c=h.classList.toggle("closed");
+  $("out-h").setAttribute("aria-expanded",c?"false":"true");};
+if(innerWidth<=860) $("hero").classList.add("closed");
 $("h-l").onclick=openLocks;
-markScen(0); apply(null); home();
+markScen(0); apply(null); applyDim(); home();
 setTimeout(()=>{const h=$("hint");if(h)h.style.opacity=0;},7000);
 </script>
 

@@ -68,6 +68,17 @@ graphe, moyenne pondérée des cartes amont élevée à un exposant de non-liné
 Référence (tous les curseurs au repos) : **+2,8 °C, 605 ppm, 42,6 GtCO₂/an, +58 cm,
 pH 7,96, budget 1,5 °C épuisé dans 6 ans.**
 
+### Ce que ça coûte
+
+Le bandeau affiche en permanence sept sorties sensibles, recalculées à chaque geste :
+part des espèces menacées d'extinction, niveau marin et population sous la ligne de
+tempête, récoltes perdues traduites en rations annuelles, population hors de la zone
+climatique habitable, récifs coralliens perdus, risque de famine et de conflit armé.
+Chaque ligne ouvre la carte correspondante.
+
+Ces chiffres sont des ordres de grandeur issus d'un modèle simplifié — ils servent à
+faire sentir des proportions, pas à être cités.
+
 ### Les verrous
 
 L'édition épurée retient le **réchauffement le plus haut atteint** pendant la session.
