@@ -114,7 +114,51 @@ affiché est bien dû au curseur et non au modèle.
 
 ---
 
-## 3. Ce que le modèle ne fait pas
+## 3. Les verrous (édition épurée)
+
+Le modèle décrit plus haut est **sans mémoire** : il calcule un équilibre à partir de la
+position des curseurs, donc reculer un curseur ramène exactement à l'état d'avant. Les
+points de bascule contredisent précisément cela — d'où une couche de mémoire.
+
+L'application retient le **ΔT le plus haut atteint dans la session**. Quand ce pic
+franchit un seuil, l'élément se verrouille, et il ne se déverrouille plus.
+
+| Verrou | Seuil | Effet persistant dans le modèle |
+|---|---|---|
+| Récifs coralliens | 1,5 °C | plancher d'indice 1,5 sur la biodiversité marine |
+| Calottes polaires | 1,5 °C | plancher 1,25 — l'essentiel de l'engagement est post-2100 |
+| Permafrost | 1,5 °C | plancher de 0,9 GtCO₂e/an, quelle que soit la température ensuite |
+| Glaciers de montagne | 2,0 °C | plancher d'indice 1,3 |
+| Forêt amazonienne | 3,5 °C | plancher de 0,6 GtCO₂/an |
+| Circulation atlantique | 4,0 °C | plancher d'indice 1,6 |
+
+Seuils : valeur centrale d'Armstrong McKay *et al.*, *Science*, 2022. **Les fourchettes
+sont larges** — 0,8 à 3 °C pour le Groenland, 1,4 à 8 °C pour l'AMOC. Les planchers, eux,
+sont des choix d'auteur : ils traduisent « on ne redescend plus en dessous », pas une
+amplitude mesurée.
+
+Conséquence pédagogique : passez en *Croissance fossile* puis revenez en *Neutralité*,
+la température redescend à +1,5 °C, les canicules perdent 73 % — et les famines ne
+reculent que de 11 %, parce que ce qui a été cassé ne se répare pas. C'est l'overshoot,
+en trois gestes.
+
+Le bouton ↺ remet les curseurs au plus bas **et efface la mémoire**, pour rejouer depuis
+un climat où aucun seuil n'est franchi.
+
+### Un piège évité
+
+Les exposants de non-linéarité `γ` se **composent** le long d'une chaîne : appliqués à
+chaque maillon de `rendements → famines → déplacements → conflits`, ils donnaient un
+exposant total de ≈ 8 et faisaient diverger la boucle `déplacements ↔ conflits` jusqu'à
+l'infini dès que les planchers montaient. Les `γ` sont donc réservés aux **extrêmes
+physiques** (canicules, incendies, sécheresses, crues, submersions), où la non-linéarité
+est un fait mesuré ; la cascade humaine les transmet sans les multiplier. Les
+rétroactions (`fb`) sont par ailleurs exclues de la propagation d'indices, puisqu'elles
+sont déjà traitées dans la physique.
+
+---
+
+## 4. Ce que le modèle ne fait pas
 
 - **Pas de géographie.** Une moyenne mondiale, pas de cartes régionales.
 - **Pas de temps.** Un seul horizon, 2100, sous l'hypothèse explicite d'un niveau

@@ -68,6 +68,17 @@ graphe, moyenne pondérée des cartes amont élevée à un exposant de non-liné
 Référence (tous les curseurs au repos) : **+2,8 °C, 605 ppm, 42,6 GtCO₂/an, +58 cm,
 pH 7,96, budget 1,5 °C épuisé dans 6 ans.**
 
+### Les verrous
+
+L'édition épurée retient le **réchauffement le plus haut atteint** pendant la session.
+Quand ce pic franchit le seuil d'un point de bascule — récifs et calottes à 1,5 °C,
+glaciers à 2 °C, Amazonie à 3,5 °C, AMOC à 4 °C — la carte se verrouille et **ne se
+déverrouille plus** : un cadenas apparaît, et l'élément garde un plancher dans le modèle.
+
+Poussez *Croissance fossile*, revenez à *Neutralité* : la température redescend à
++1,5 °C, les canicules perdent 73 % — et les famines ne reculent que de 11 %. C'est
+l'overshoot montré en trois gestes. Le bouton ↺ efface la mémoire pour rejouer.
+
 ### Ce que ça vaut, ce que ça ne vaut pas
 
 Les chiffres physiques sont des ordres de grandeur défendables. **Les pourcentages
