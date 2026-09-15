@@ -1,0 +1,940 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fresque du Climat Interactive</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    color-scheme: light dark;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body{ margin:0; font:14px/1.45 system-ui, sans-serif; background:#faf9f7; }
+  img{ max-width:100%; }
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
+<style>
+:root{
+  --paper:#E4D5B7; --paper-grain:#D8C6A2;
+  --surface:#F7F1E5; --surface-2:#EFE6D3; --surface-3:#E6DAC1;
+  --ink:#241F18; --ink-2:#5E5546; --ink-3:#8A7E69;
+  --line:#CDBB98; --line-soft:#DCCDAF;
+  --accent:#12626E; --accent-soft:#D3E5E4;
+  --up:#B5381F; --down:#22607F;
+  --f-act:#6F55A0; --f-ene:#B84526; --f-atm:#9C6A11; --f-phy:#1A6674; --f-eco:#4A7434; --f-hum:#8A3557;
+  --card-bg:#FBF7ED; --card-edge:#BFAC88;
+  --shadow:0 1px 0 rgba(90,70,35,.18), 0 6px 18px -10px rgba(70,52,22,.5);
+  --r:3px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#16130E; --paper-grain:#1D1913;
+    --surface:#221D15; --surface-2:#2A241B; --surface-3:#332B20;
+    --ink:#F0E7D5; --ink-2:#B3A78E; --ink-3:#847A67;
+    --line:#43392B; --line-soft:#352D22;
+    --accent:#5FBECB; --accent-soft:#12302F;
+    --up:#E8714F; --down:#6FA9CC;
+    --f-act:#A98FD8; --f-ene:#E2775A; --f-atm:#D2A03F; --f-phy:#5FB2C0; --f-eco:#86B96A; --f-hum:#CE7897;
+    --card-bg:#272117; --card-edge:#4A3F2E;
+    --shadow:0 1px 0 rgba(0,0,0,.4), 0 8px 20px -12px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#16130E; --paper-grain:#1D1913;
+  --surface:#221D15; --surface-2:#2A241B; --surface-3:#332B20;
+  --ink:#F0E7D5; --ink-2:#B3A78E; --ink-3:#847A67;
+  --line:#43392B; --line-soft:#352D22;
+  --accent:#5FBECB; --accent-soft:#12302F;
+  --up:#E8714F; --down:#6FA9CC;
+  --f-act:#A98FD8; --f-ene:#E2775A; --f-atm:#D2A03F; --f-phy:#5FB2C0; --f-eco:#86B96A; --f-hum:#CE7897;
+  --card-bg:#272117; --card-edge:#4A3F2E;
+  --shadow:0 1px 0 rgba(0,0,0,.4), 0 8px 20px -12px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--surface); color:var(--ink);
+  font-family:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-size:14px; line-height:1.45; -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3{font-family:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;margin:0;text-wrap:balance;letter-spacing:-.02em}
+.mono{font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;font-variant-numeric:tabular-nums}
+button{font:inherit;color:inherit}
+
+/* ---------- shell ---------- */
+.app{display:grid;grid-template-columns:288px minmax(0,1fr) 336px;grid-template-rows:auto minmax(0,1fr);height:100%;}
+.topbar{grid-column:1/-1;display:flex;align-items:center;gap:18px;flex-wrap:wrap;
+  padding:10px 18px;background:var(--surface);border-bottom:1px solid var(--line);}
+.brand{display:flex;align-items:baseline;gap:10px;min-width:0}
+.brand h1{font-size:19px;font-weight:800}
+.brand .sub{color:var(--ink-3);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.dials{display:flex;gap:0;margin-left:auto;flex-wrap:wrap}
+.dial{padding:2px 16px;border-left:1px solid var(--line-soft);display:flex;flex-direction:column;gap:1px;min-width:96px}
+.dial:first-child{border-left:0}
+.dial .k{font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);white-space:nowrap}
+.dial .v{font-size:19px;font-weight:600;line-height:1.1}
+.dial .d{font-size:11px;color:var(--ink-3)}
+.dial .d.up{color:var(--up)} .dial .d.down{color:var(--down)}
+.dial.alert .v{color:var(--up)}
+
+.rail,.detail{background:var(--surface);overflow-y:auto;overflow-x:hidden}
+.rail{border-right:1px solid var(--line)}
+.detail{border-left:1px solid var(--line)}
+.stage{position:relative;background:
+  radial-gradient(circle at 18% 22%, var(--paper-grain) 0 1.5px, transparent 1.6px) 0 0/22px 22px,
+  radial-gradient(circle at 70% 65%, var(--paper-grain) 0 1.5px, transparent 1.6px) 7px 11px/29px 29px,
+  var(--paper);
+  overflow:hidden;touch-action:none;cursor:grab}
+.stage.dragging{cursor:grabbing}
+svg#board{display:block;width:100%;height:100%}
+
+/* ---------- rail ---------- */
+.sec{padding:14px 16px;border-bottom:1px solid var(--line-soft)}
+.sec h2{font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-2);font-weight:700;margin-bottom:4px}
+.sec p.hint{font-size:12px;color:var(--ink-3);margin:0 0 10px}
+.presets{display:flex;flex-wrap:wrap;gap:6px}
+.preset{background:var(--surface-2);border:1px solid var(--line);border-radius:999px;padding:5px 11px;font-size:12px;cursor:pointer;transition:background .12s,border-color .12s}
+.preset:hover{background:var(--surface-3)}
+.preset[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+
+.lever{padding:11px 16px;border-bottom:1px solid var(--line-soft)}
+.lever-head{display:flex;align-items:baseline;gap:8px;margin-bottom:6px}
+.lever-head .nm{font-weight:600;font-size:13px;flex:1;min-width:0}
+.lever-head .val{font-size:13px;font-weight:600}
+.lever-head .val.up{color:var(--up)} .lever-head .val.down{color:var(--down)}
+.lever .note{font-size:11px;color:var(--ink-3);margin-top:5px}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;background:transparent;margin:0;height:18px;cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--down) 0%,var(--line) 50%,var(--up) 100%);opacity:.55}
+input[type=range]::-moz-range-track{height:4px;border-radius:2px;background:linear-gradient(90deg,var(--down) 0%,var(--line) 50%,var(--up) 100%);opacity:.55}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:var(--surface);border:2px solid var(--ink);margin-top:-5.5px;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+input[type=range]::-moz-range-thumb{width:13px;height:13px;border-radius:50%;background:var(--surface);border:2px solid var(--ink)}
+input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.toggles{display:flex;flex-direction:column;gap:8px}
+.tog{display:flex;align-items:center;gap:9px;font-size:12.5px;cursor:pointer;color:var(--ink-2)}
+.tog input{accent-color:var(--accent);width:15px;height:15px;margin:0}
+.legend{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--ink-2)}
+.legend .row{display:flex;align-items:center;gap:8px}
+.swatch{width:11px;height:11px;border-radius:2px;flex:none}
+.btn{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r);padding:7px 12px;font-size:12.5px;cursor:pointer;width:100%;font-weight:500}
+.btn:hover{background:var(--surface-3)}
+
+/* ---------- detail ---------- */
+.d-head{padding:16px 18px 12px;border-bottom:1px solid var(--line-soft)}
+.d-kicker{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.num{font-family:"IBM Plex Mono",monospace;font-size:11px;font-weight:600;color:var(--surface);background:var(--ink);border-radius:999px;padding:2px 7px}
+.fam{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.d-head h2{font-size:22px;font-weight:700;line-height:1.15}
+.d-metric{margin-top:12px;display:flex;flex-direction:column;gap:3px}
+.d-metric .big{font-size:28px;font-weight:600;line-height:1}
+.d-metric .cap{font-size:11px;color:var(--ink-3);letter-spacing:.05em;text-transform:uppercase}
+.bar{height:6px;background:var(--surface-3);border-radius:3px;overflow:hidden;margin-top:10px;position:relative}
+.bar i{position:absolute;top:0;bottom:0;display:block}
+.bar .mid{position:absolute;left:50%;top:-2px;bottom:-2px;width:1px;background:var(--ink-3);opacity:.6}
+.d-body{padding:14px 18px;font-size:13.5px;color:var(--ink-2)}
+.d-body p{margin:0 0 12px}
+.d-body strong{color:var(--ink)}
+.mean{background:var(--surface-2);border:1px solid var(--line-soft);border-radius:var(--r);padding:12px 14px;font-size:13px;line-height:1.5;margin:0 0 12px}
+.mean p{margin:0} .mean p+p{margin-top:8px} .mean .dyn{color:var(--ink)} .mean b{font-weight:700}
+.links h3{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:700;margin:0 0 8px}
+.links{padding:0 18px 18px}
+.links + .links{padding-top:2px}
+.lk{display:flex;gap:9px;align-items:flex-start;padding:7px 9px;border-radius:var(--r);cursor:pointer;background:var(--surface-2);margin-bottom:5px;border:1px solid transparent;text-align:left;width:100%}
+.lk:hover{border-color:var(--line);background:var(--surface-3)}
+.lk .n{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink-3);padding-top:2px;flex:none;width:18px}
+.lk .t{font-size:12.5px;font-weight:600;line-height:1.25}
+.lk .why{font-size:11.5px;color:var(--ink-3);display:block;font-weight:400}
+.lk .pct{margin-left:auto;font-size:11.5px;font-weight:600;flex:none}
+.empty{padding:0 18px 18px;font-size:12.5px;color:var(--ink-3)}
+.foot{padding:14px 18px 26px;font-size:11.5px;color:var(--ink-3);border-top:1px solid var(--line-soft)}
+.foot code{font-family:"IBM Plex Mono",monospace;font-size:11px}
+
+/* ---------- svg ---------- */
+.card{cursor:pointer}
+.card rect.bg{fill:var(--card-bg);stroke:var(--card-edge);stroke-width:1}
+.card.bonus rect.bg{stroke-dasharray:3 2.5}
+.card text.t{font-family:"Instrument Sans",sans-serif;font-size:13px;font-weight:600;fill:var(--ink)}
+.card text.id{font-family:"IBM Plex Mono",monospace;font-size:9.5px;fill:var(--ink-3)}
+.card text.v{font-family:"IBM Plex Mono",monospace;font-size:10.5px;font-weight:600}
+.card .accentbar{stroke-width:3}
+.card.sel rect.bg{stroke:var(--ink);stroke-width:2}
+.card.dim{opacity:.22;transition:opacity .18s}
+.edge{fill:none;stroke-width:1.4;opacity:.52}
+.edge.fb{stroke-dasharray:5 4}
+.edge.hot{opacity:1;stroke-width:2.4}
+.edge.flash{opacity:1;stroke-width:3.4}
+.edge.dim{opacity:.06}
+#ar-act path{fill:var(--f-act)}
+#ar-ene path{fill:var(--f-ene)}
+#ar-atm path{fill:var(--f-atm)}
+#ar-phy path{fill:var(--f-phy)}
+#ar-eco path{fill:var(--f-eco)}
+#ar-hum path{fill:var(--f-hum)}
+.elab{font-family:"Instrument Sans",sans-serif;font-size:10.5px;fill:var(--ink-2)}
+.zoomctl{position:absolute;right:12px;bottom:12px;display:flex;gap:6px;z-index:3}
+.zoomctl button{width:32px;height:32px;border-radius:var(--r);border:1px solid var(--line);background:var(--surface);cursor:pointer;font-size:15px;line-height:1;box-shadow:var(--shadow)}
+.zoomctl button.wide{width:auto;padding:0 10px;font-size:12px}
+.stagehint{position:absolute;left:12px;bottom:12px;font-size:11px;color:var(--ink-3);background:color-mix(in srgb,var(--surface) 78%,transparent);padding:4px 9px;border-radius:999px;z-index:3;pointer-events:none}
+
+@media (max-width:1180px){
+  .app{grid-template-columns:262px minmax(0,1fr) 300px}
+  .dials{width:100%;margin-left:0;overflow-x:auto}
+  .dial{min-width:86px;padding:2px 12px}
+}
+@media (max-width:900px){
+  html,body{height:auto}
+  .app{display:flex;flex-direction:column;height:auto}
+  .topbar{order:0} .stage{order:1} .detail{order:2} .rail{order:3}
+  .topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+  .stage{height:62vh;min-height:380px;border-bottom:1px solid var(--line)}
+  .rail,.detail{border:0;max-height:none;overflow:visible}
+  .detail{border-bottom:1px solid var(--line)}
+  .brand h1{font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <h1>Fresque du Climat</h1>
+      <span class="sub">Simulateur de causalité</span>
+    </div>
+    <div class="dials" id="dials"></div>
+  </header>
+
+  <aside class="rail">
+    <div class="sec">
+      <h2>Scénarios</h2>
+      <p class="hint">Un point de départ, puis affinez carte par carte avec les leviers.</p>
+      <div class="presets" id="presets"></div>
+    </div>
+    <div id="levers"></div>
+    <div class="sec">
+      <h2>Affichage</h2>
+      <div class="toggles">
+        <label class="tog"><input type="checkbox" id="tg-bonus"> Cartes optionnelles (6)</label>
+        <label class="tog"><input type="checkbox" id="tg-fb" checked> Boucles de rétroaction</label>
+        <label class="tog"><input type="checkbox" id="tg-focus" checked> Isoler la chaîne causale</label>
+      </div>
+    </div>
+    <div class="sec">
+      <h2>Familles de cartes</h2>
+      <div class="legend" id="legend"></div>
+    </div>
+    <div class="sec">
+      <h2>Modèle</h2>
+      <p class="hint" style="margin-bottom:8px">Ordres de grandeur calibrés sur le GIEC&nbsp;AR6 et le Global&nbsp;Carbon&nbsp;Budget. Horizon 2100, à niveau d'émissions maintenu.</p>
+      <button class="btn" id="btn-reset">Revenir à la trajectoire actuelle</button>
+      <p class="hint" style="margin:10px 0 0">Reconstitution personnelle inspirée de l'atelier de cartes du même nom, sans lien avec l'association qui l'anime.</p>
+    </div>
+  </aside>
+
+  <main class="stage" id="stage">
+    <svg id="board" role="img" aria-label="Fresque du climat : 42 cartes reliées par des flèches de cause à effet, des activités humaines jusqu'aux conflits armés."></svg>
+    <div class="stagehint" id="stagehint">Glisser pour déplacer · molette pour zoomer · cliquer une carte</div>
+    <div class="zoomctl">
+      <button id="z-out" aria-label="Dézoomer">−</button>
+      <button id="z-in" aria-label="Zoomer">+</button>
+      <button id="z-fit" class="wide">Tout voir</button>
+      <button id="z-home" class="wide">Début</button>
+    </div>
+  </main>
+
+  <aside class="detail" id="detail"></aside>
+</div>
+
+<script>
+/* ============================================================
+   DONNÉES — 42 cartes du jeu officiel + 10 cartes proposées
+   ============================================================ */
+const FAM = {
+  act:{n:"Activités humaines", c:"var(--f-act)"},
+  ene:{n:"Énergie & émissions", c:"var(--f-ene)"},
+  atm:{n:"Chimie de l'atmosphère", c:"var(--f-atm)"},
+  phy:{n:"Physique du climat", c:"var(--f-phy)"},
+  eco:{n:"Écosystèmes", c:"var(--f-eco)"},
+  hum:{n:"Conséquences humaines", c:"var(--f-hum)"}
+};
+
+const NODES = [
+{id:1,f:"act",L:0,R:3,n:"Activités humaines",m:"niveau d'activité",d:"Se nourrir, se loger, se déplacer, produire : 8 milliards d'humains, dont le niveau de vie moyen ne cesse de croître. Point de départ de toute la fresque."},
+{id:2,f:"act",L:1,R:1,n:"Industrie",m:"production industrielle",d:"Acier, ciment, chimie, biens de consommation. ≈ 16 GtCO₂/an d'émissions directes et indirectes, plus les gaz fluorés du froid et de l'électronique."},
+{id:3,f:"act",L:1,R:2,n:"Utilisation des bâtiments",m:"consommation des bâtiments",d:"Chauffage, eau chaude, climatisation, éclairage : ≈ 7 GtCO₂/an. La climatisation est le poste qui croît le plus vite, en boucle avec les canicules."},
+{id:4,f:"act",L:1,R:3,n:"Transport",m:"trafic",d:"Route, aérien, maritime : ≈ 10 GtCO₂/an, à plus de 90 % au pétrole. Le secteur le moins décarboné à ce jour."},
+{id:8,f:"act",L:1,R:5,n:"Agriculture",m:"pression agricole",d:"Nourrir 8 milliards d'humains : la moitié des terres habitables. Première cause de déforestation et premier émetteur de méthane et de protoxyde d'azote."},
+{id:5,f:"ene",L:2,R:2,n:"Utilisation des énergies fossiles",m:"combustion fossile",d:"Charbon, pétrole, gaz : ≈ 80 % de l'énergie primaire mondiale. Chaque tonne de carbone brûlée finit dans l'atmosphère sous forme de CO₂."},
+{id:6,f:"ene",L:2,R:5,n:"Déforestation",m:"déforestation",d:"≈ 10 Mha de forêt disparaissent chaque année. Le carbone des arbres et des sols repart dans l'air : ≈ 4,5 GtCO₂/an nettes."},
+{id:10,f:"atm",L:3,R:0,n:"Émissions d'aérosols",m:"charge en aérosols",d:"Soufre et suies de la combustion. Ils réfléchissent le rayonnement solaire et masquent aujourd'hui ≈ 0,4 °C de réchauffement — un effet qui disparaît en quelques semaines si on arrête de brûler."},
+{id:7,f:"ene",L:3,R:2,n:"Émissions de CO₂",m:"émissions de CO₂",d:"≈ 41,5 GtCO₂/an d'origine humaine (37 fossiles + 4,5 usage des sols). Le CO₂ est responsable des deux tiers du forçage additionnel.",anchor:"co2"},
+{id:9,f:"atm",L:3,R:4,n:"Émissions d'autres GES",m:"autres gaz à effet de serre",d:"Méthane (élevage, rizières, fuites de gaz), protoxyde d'azote (engrais), gaz fluorés : ≈ 12 GtCO₂e/an. Le méthane est 80 fois plus réchauffant que le CO₂ à 20 ans.",anchor:"ghg"},
+{id:12,f:"atm",L:4,R:2,n:"Puits de carbone",m:"part absorbée",d:"Océans et végétation absorbent aujourd'hui ≈ 55 % de nos émissions. Ce service gratuit s'affaiblit quand on déforeste et quand l'océan se réchauffe.",anchor:"sink"},
+{id:11,f:"atm",L:5,R:2,n:"Concentration en CO₂",m:"concentration en 2100",d:"280 ppm avant l'ère industrielle, ≈ 424 ppm aujourd'hui — un niveau inédit depuis 3 millions d'années. Une partie du CO₂ émis reste dans l'air plusieurs siècles.",anchor:"ppm"},
+{id:24,f:"phy",L:5,R:5,n:"Acidification de l'océan",m:"acidification",d:"Le CO₂ dissous forme de l'acide carbonique : le pH de surface est passé de 8,2 à 8,05, soit +30 % d'ions H⁺. Conséquence directe des puits de carbone océaniques.",anchor:"ph"},
+{id:13,f:"atm",L:6,R:2,n:"Effet de serre additionnel",m:"effet de serre additionnel",d:"Les molécules à 3 atomes ou plus absorbent l'infrarouge que la Terre réémet. Sans effet de serre naturel : −18 °C. Ce que nous ajoutons s'empile par-dessus."},
+{id:23,f:"eco",L:6,R:5,n:"Problèmes de calcification",m:"difficulté à calcifier",d:"L'acidification consomme les ions carbonate dont coquilles et squelettes calcaires sont faits. Construire sa coquille coûte de plus en plus d'énergie."},
+{id:15,f:"phy",L:7,R:2,n:"Forçage radiatif",m:"forçage radiatif",d:"Le déséquilibre imposé au système climatique, en W/m². ≈ +2,7 W/m² aujourd'hui, GES moins aérosols. Étendu à la planète, cela équivaut à plusieurs bombes d'Hiroshima par seconde.",anchor:"forc"},
+{id:29,f:"eco",L:7,R:5,n:"Ptéropodes et coccolithophores",m:"déclin du plancton calcaire",d:"Papillons de mer et micro-algues à coque calcaire : base des réseaux trophiques marins et acteurs majeurs de la pompe biologique de carbone."},
+{id:14,f:"phy",L:8,R:2,n:"Bilan énergétique",m:"énergie accumulée",d:"L'énergie piégée se répartit : 91 % dans l'océan, 5 % dans les sols, 3 % dans la fonte des glaces, 1 % dans l'atmosphère. Tout le reste de la fresque découle de cette répartition.",anchor:"forc"},
+{id:21,f:"phy",L:9,R:1,n:"Hausse de la température",m:"réchauffement en 2100",d:"≈ +1,3 °C au-dessus de 1850-1900 aujourd'hui. Chaque tranche de 1000 GtCO₂ émises ajoute ≈ 0,45 °C, quasi linéairement.",anchor:"dt"},
+{id:17,f:"phy",L:9,R:3,n:"Hausse de la température de l'eau",m:"réchauffement de l'océan",d:"L'océan encaisse 91 % de l'excès d'énergie. Il se dilate, stratifie, perd son oxygène et alimente les cyclones.",anchor:"dt"},
+{id:18,f:"phy",L:9,R:5,n:"Fonte de la banquise",m:"perte de banquise",d:"La banquise arctique d'été a perdu ≈ 40 % de sa surface depuis 1979. Elle flotte : sa fonte n'élève pas le niveau marin, mais elle remplace un miroir blanc par un océan sombre."},
+{id:16,f:"phy",L:9,R:6,n:"Fonte des glaciers",m:"perte des glaciers",d:"Les glaciers de montagne perdent ≈ 270 Gt/an. Châteaux d'eau des Andes, de l'Himalaya et des Alpes, ils régulent le débit d'été de fleuves qui alimentent des milliards de personnes."},
+{id:19,f:"phy",L:9,R:7,n:"Fonte des calottes glaciaires",m:"perte des calottes",d:"Groenland : +7 m de niveau marin potentiel. Antarctique : +54 m. Elles fondent lentement mais leur engagement se joue à quelques dixièmes de degré près."},
+{id:41,f:"phy",L:10,R:0,n:"Permafrost",m:"dégel du permafrost",d:"Les sols gelés du Grand Nord stockent ≈ 1500 GtC, soit le double du carbone de l'atmosphère. En dégelant, ils relâchent CO₂ et méthane : une rétroaction qui s'auto-entretient."},
+{id:36,f:"phy",L:10,R:1,n:"Canicules",m:"intensité des canicules",d:"L'événement climatique le plus directement lié au réchauffement moyen : un décalage de la courbe de +1 °C multiplie par 5 à 10 la fréquence des extrêmes chauds.",g:2.2},
+{id:28,f:"eco",L:10,R:2,n:"Vecteurs de maladie",m:"extension des vecteurs",d:"Moustiques (dengue, paludisme, chikungunya), tiques : la température conditionne leur aire de répartition et la vitesse de réplication des virus qu'ils portent.",g:1.5},
+{id:20,f:"phy",L:10,R:3,n:"Perturbation du cycle de l'eau",m:"intensité du cycle de l'eau",d:"+7 % de vapeur d'eau dans l'air par degré (Clausius-Clapeyron). L'atmosphère assèche plus vite là où il ne pleut pas, et déverse plus fort là où il pleut.",g:1.2},
+{id:25,f:"eco",L:10,R:4,n:"Biodiversité terrestre",m:"pression sur les espèces",d:"Les espèces doivent migrer de ≈ 5 km/an vers les pôles ou de 5 m/an en altitude pour rester dans leur niche climatique. Beaucoup ne le peuvent pas.",g:1.4},
+{id:34,f:"phy",L:10,R:5,n:"Cyclones",m:"intensité des cyclones",d:"Leur nombre ne devrait pas augmenter, mais leur intensité oui : l'énergie vient de la chaleur de l'océan de surface, et les précipitations associées grimpent avec la vapeur d'eau.",g:1.4},
+{id:27,f:"eco",L:10,R:6,n:"Biodiversité marine",m:"pression sur le vivant marin",d:"Triple peine : eau plus chaude, plus acide, moins oxygénée. Les coraux, qui abritent 25 % des espèces marines, blanchissent dès +1,5 °C.",g:1.5},
+{id:22,f:"phy",L:10,R:7,n:"Montée des eaux",m:"niveau marin en 2100",d:"Deux tiers de dilatation thermique, un tiers de fonte terrestre. +20 cm depuis 1900, et un engagement de plusieurs mètres sur les siècles à venir.",anchor:"slr"},
+{id:35,f:"phy",L:11,R:0,n:"Incendies",m:"risque d'incendie",d:"Chaleur, sécheresse et vent allongent la saison des feux. Les mégafeux relâchent le carbone des forêts : encore une rétroaction positive.",g:2.0},
+{id:30,f:"phy",L:11,R:1,n:"Sécheresses",m:"intensité des sécheresses",d:"Moins de pluie par endroits, mais surtout plus d'évaporation partout : les sols s'assèchent même à pluviométrie constante.",g:1.7},
+{id:26,f:"phy",L:11,R:2,n:"Crues",m:"intensité des crues",d:"Pluies plus intenses sur sols secs et imperméabilisés. Les épisodes cévenols ou les moussons extrêmes gagnent ≈ 7 % d'eau par degré.",g:1.5},
+{id:31,f:"eco",L:11,R:3,n:"Ressources en eau douce",m:"tension sur l'eau douce",d:"Glaciers qui disparaissent, nappes qui ne se rechargent plus, neige qui tombe en pluie : le stock saisonnier gratuit s'évapore. 2 milliards de personnes déjà en stress hydrique.",g:1.3},
+{id:33,f:"hum",L:11,R:7,n:"Submersions",m:"exposition à la submersion",d:"≈ 900 millions de personnes vivent à moins de 10 m au-dessus du niveau marin. Ce n'est pas la moyenne qui noie, mais la tempête posée dessus.",g:1.8},
+{id:32,f:"eco",L:12,R:2,n:"Baisse des rendements agricoles",m:"perte de rendement",d:"Au-delà de +1,5 °C, les gains des hautes latitudes ne compensent plus les pertes tropicales. Blé, maïs et riz perdent ≈ 6 à 7 % de rendement par degré.",g:1.5},
+{id:37,f:"hum",L:13,R:1,n:"Famines",m:"risque de famine",d:"La production mondiale ne manque pas encore : ce sont les chocs simultanés sur plusieurs greniers, et les prix qui s'envolent, qui affament.",g:1.8},
+{id:38,f:"hum",L:13,R:3,n:"Santé humaine",m:"atteinte à la santé",d:"Chaleur, maladies vectorielles, malnutrition, pollution, santé mentale. L'OMS estime le climat comme la première menace sanitaire du XXIᵉ siècle.",g:1.4},
+{id:39,f:"hum",L:13,R:5,n:"Déplacement de populations",m:"déplacements",d:"L'essentiel des mouvements est interne et régional, pas transcontinental. Ce sont les plus pauvres qui se déplacent le moins et encaissent le plus.",g:1.7},
+{id:42,f:"hum",L:14,R:2,n:"Accroissement des inégalités",m:"creusement des inégalités",d:"Les 10 % les plus riches émettent la moitié du CO₂ ; les 50 % les plus pauvres en émettent 12 % et subissent le plus d'impacts. Le climat amplifie les écarts existants.",g:1.4},
+{id:40,f:"hum",L:14,R:4,n:"Conflits armés",m:"risque de conflit",d:"Le climat est un multiplicateur de menace : il agit sur des tensions préexistantes (eau, terres, prix alimentaires) plutôt qu'il ne crée les conflits de toutes pièces.",g:1.8},
+
+/* ---- cartes proposées, hors jeu officiel ---- */
+{id:43,f:"ene",L:1,R:0,n:"Énergies bas-carbone",b:1,m:"part du bas-carbone",d:"Renouvelables et nucléaire : ≈ 18 % de l'énergie primaire. Carte manquante du jeu, qui n'aborde que les causes — elle permet de jouer la sortie des fossiles.",anchor:"lowc"},
+{id:44,f:"act",L:0,R:1,n:"Sobriété et efficacité",b:1,m:"effort de sobriété",d:"Le seul levier qui agit à la source sur les quatre secteurs à la fois. Divise la demande avant même de se demander comment la produire. Dans ce simulateur, elle agit à travers les quatre curseurs de secteur."},
+{id:45,f:"eco",L:3,R:6,n:"Reforestation et sols",b:1,m:"puits ajoutés",d:"Restaurer forêts, mangroves, tourbières et carbone des sols. Puissant mais lent, saturable et réversible : un complément, jamais un substitut à la baisse des émissions."},
+{id:46,f:"ene",L:2,R:0,n:"Captage et stockage du CO₂",b:1,m:"CO₂ capté",d:"≈ 50 MtCO₂/an captés aujourd'hui, soit 0,1 % des émissions. Tous les scénarios 1,5 °C du GIEC en supposent des gigatonnes : un pari technologique non tenu à ce jour.",anchor:"ccs"},
+{id:49,f:"hum",L:4,R:0,n:"Pollution de l'air",x:1,m:"mortalité liée à l'air",d:"Les mêmes aérosols qui refroidissent la planète tuent ≈ 4 millions de personnes par an. Le co-bénéfice santé de la sortie des fossiles est immédiat et local."},
+{id:47,f:"phy",L:10,R:8,n:"Circulation océanique (AMOC)",x:1,m:"affaiblissement de l'AMOC",d:"L'eau douce de fonte freine la plongée d'eau dense au large du Groenland. Un ralentissement marqué refroidirait l'Europe du Nord tout en déplaçant les moussons : point de bascule à basse probabilité, impact énorme.",g:1.6},
+{id:48,f:"eco",L:12,R:5,n:"Dépérissement de l'Amazonie",b:1,m:"risque de bascule",d:"Entre 20 et 25 % de déforestation, la forêt ne recycle plus assez d'humidité et bascule vers la savane, relâchant des dizaines de GtC. On est à ≈ 17 %.",g:2.0},
+{id:50,f:"eco",L:12,R:6,n:"Ressources halieutiques",x:1,m:"perte de pêche",d:"3 milliards de personnes tirent 20 % de leurs protéines animales de la mer. Les stocks migrent vers les pôles et le potentiel de capture tropical chute de 40 % à +3 °C.",g:1.5},
+{id:52,f:"hum",L:12,R:0,n:"Stress thermique au travail",b:1,m:"heures de travail perdues",d:"Au-delà de 35 °C de température humide, le corps ne peut plus se refroidir. Des centaines de milliards d'heures de travail agricole et de BTP sont déjà perdues chaque année.",g:2.2},
+{id:51,f:"hum",L:14,R:6,n:"Coût économique et assurances",x:1,m:"coût des dommages",d:"≈ 250 Md$ de dommages climatiques par an. Là où le risque devient inassurable, la valeur immobilière s'effondre avant que l'eau n'arrive.",g:1.8}
+];
+
+/* ---- liens de causalité (a → b). why = ce que la flèche transporte ---- */
+const EDGES = [
+{a:1,b:2,why:"biens et services demandés"},
+{a:1,b:3,why:"surface bâtie et confort"},
+{a:1,b:4,why:"besoin de mobilité"},
+{a:1,b:8,why:"besoin de se nourrir"},
+{a:2,b:5,w:1,why:"chaleur et procédés industriels"},
+{a:3,b:5,w:1,why:"chauffage, climatisation"},
+{a:4,b:5,w:1,why:"carburants liquides"},
+{a:8,b:5,w:.5,why:"engins, engrais de synthèse"},
+{a:8,b:6,w:1,why:"conquête de terres cultivables"},
+{a:8,b:9,w:1,why:"CH₄ du bétail et des rizières, N₂O des engrais"},
+{a:2,b:9,w:.3,why:"gaz fluorés (froid, électronique)"},
+{a:5,b:7,w:1,why:"combustion : C + O₂ → CO₂"},
+{a:5,b:9,w:.3,why:"fuites de méthane à l'extraction"},
+{a:5,b:10,w:1,why:"soufre et suies de combustion"},
+{a:6,b:7,w:1,why:"carbone des arbres et des sols"},
+{a:6,b:25,w:.6,why:"destruction directe des habitats"},
+{a:7,b:12,w:1,why:"ce qui est émis est d'abord offert aux puits"},
+{a:9,b:13,w:1,why:"absorption de l'infrarouge"},
+{a:12,b:11,w:1,why:"la fraction non absorbée s'accumule dans l'air"},
+{a:12,b:24,w:1,why:"le CO₂ dissous forme de l'acide carbonique"},
+{a:11,b:13,w:1,why:"plus de molécules, plus de piégeage"},
+{a:13,b:15,w:1,why:"déséquilibre radiatif positif"},
+{a:10,b:15,w:.35,neg:1,why:"réflexion du rayonnement solaire (forçage négatif)"},
+{a:15,b:14,w:1,why:"la Terre reçoit plus qu'elle ne réémet"},
+{a:14,b:17,w:1,why:"91 % de l'énergie va dans l'océan"},
+{a:14,b:21,w:1,why:"1 % atmosphère + 5 % sols"},
+{a:14,b:16,w:1,why:"3 % de l'énergie sert à faire fondre la glace"},
+{a:14,b:18,w:1,why:"chaleur de l'air et de l'océan arctiques"},
+{a:14,b:19,w:1,why:"fonte de surface et vêlage des glaciers"},
+{a:18,b:15,w:.2,fb:1,why:"albédo : le blanc qui réfléchit devient bleu qui absorbe"},
+{a:21,b:41,w:1,why:"les sols gelés dépassent 0 °C"},
+{a:41,b:7,w:.2,fb:1,why:"CO₂ libéré par la décomposition"},
+{a:41,b:9,w:.2,fb:1,why:"méthane des sols gorgés d'eau"},
+{a:21,b:20,w:1,why:"+7 % de vapeur d'eau par degré"},
+{a:21,b:36,w:1,why:"la courbe des températures se décale"},
+{a:21,b:28,w:.7,why:"aires de répartition et vitesse de réplication"},
+{a:21,b:25,w:.7,why:"niches climatiques déplacées trop vite"},
+{a:21,b:30,w:.5,why:"évaporation accrue des sols"},
+{a:17,b:22,w:1,why:"dilatation thermique de l'eau (≈ 2/3 de la hausse)"},
+{a:17,b:27,w:1,why:"blanchiment des coraux, désoxygénation"},
+{a:17,b:34,w:1,why:"l'eau chaude est le carburant des cyclones"},
+{a:16,b:22,w:.5,why:"eau de fonte ajoutée à l'océan"},
+{a:19,b:22,w:.6,why:"glace posée sur la terre qui rejoint la mer"},
+{a:16,b:31,w:.7,why:"perte du stock d'eau saisonnier"},
+{a:20,b:26,w:1,why:"pluies plus intenses"},
+{a:20,b:30,w:1,why:"répartition plus contrastée des pluies"},
+{a:20,b:31,w:.6,why:"recharge des nappes désorganisée"},
+{a:22,b:33,w:1,why:"le trait de côte recule"},
+{a:34,b:33,w:.5,why:"surcote de tempête par-dessus le niveau moyen"},
+{a:34,b:26,w:.4,why:"pluies cycloniques"},
+{a:30,b:35,w:1,why:"végétation sèche = combustible"},
+{a:36,b:35,w:.6,why:"chaleur et vent, saison des feux allongée"},
+{a:35,b:7,w:.15,fb:1,why:"carbone des forêts brûlées"},
+{a:30,b:31,w:.6,why:"débits et nappes en baisse"},
+{a:30,b:32,w:1,why:"stress hydrique des cultures"},
+{a:36,b:32,w:.7,why:"échaudage pendant la floraison"},
+{a:26,b:32,w:.4,why:"cultures noyées, sols lessivés"},
+{a:31,b:32,w:.7,why:"irrigation impossible"},
+{a:25,b:32,w:.4,why:"pollinisation et ravageurs"},
+{a:36,b:38,w:.8,why:"mortalité directe pendant les vagues de chaleur"},
+{a:28,b:38,w:.7,why:"dengue, paludisme, maladies émergentes"},
+{a:31,b:38,w:.4,why:"eau potable et hygiène"},
+{a:24,b:23,w:1,why:"moins d'ions carbonate disponibles"},
+{a:23,b:29,w:1,why:"coquilles et coccolithes plus coûteux à fabriquer"},
+{a:29,b:27,w:1,why:"base des réseaux trophiques marins"},
+{a:27,b:37,w:.4,why:"protéines marines en moins"},
+{a:32,b:37,w:1,why:"moins de récoltes, prix qui flambent"},
+{a:37,b:38,w:.8,why:"malnutrition"},
+{a:37,b:39,w:.8,why:"on part quand on ne mange plus"},
+{a:33,b:39,w:.8,why:"territoires inhabitables"},
+{a:30,b:39,w:.4,why:"terres qui ne nourrissent plus"},
+{a:39,b:40,w:.8,why:"pression sur les ressources d'accueil"},
+{a:40,b:39,w:.5,fb:1,why:"les conflits déplacent à leur tour"},
+{a:40,b:38,w:.6,why:"blessés, effondrement des systèmes de soin"},
+{a:32,b:42,w:.5,why:"les plus pauvres consacrent 60 % de leur budget à l'alimentation"},
+{a:37,b:42,w:.6,why:"les chocs frappent d'abord les plus exposés"},
+{a:39,b:42,w:.6,why:"tout perdre en partant"},
+{a:33,b:42,w:.4,why:"capacité d'adaptation très inégale"},
+
+/* ---- liens des cartes proposées ---- */
+{a:44,b:2,w:.6,neg:1,B:1,why:"moins de biens, plus durables"},
+{a:44,b:3,w:.6,neg:1,B:1,why:"rénovation, sobriété thermique"},
+{a:44,b:4,w:.6,neg:1,B:1,why:"report modal, moins de km"},
+{a:44,b:8,w:.4,neg:1,B:1,why:"moins de produits animaux, moins de gaspillage"},
+{a:43,b:5,w:1,neg:1,B:1,why:"substitution du kWh fossile"},
+{a:45,b:12,w:.5,B:1,why:"puits biologiques restaurés"},
+{a:46,b:7,w:.4,neg:1,B:1,why:"CO₂ capté avant ou après émission"},
+{a:10,b:49,w:1,why:"particules fines respirées"},
+{a:49,b:38,w:.8,why:"4 millions de morts prématurées par an"},
+{a:19,b:47,w:.8,why:"apport d'eau douce qui freine la plongée d'eau dense"},
+{a:18,b:47,w:.3,why:"moins de formation d'eau dense en Arctique"},
+{a:47,b:20,w:.4,why:"déplacement des moussons et des pluies"},
+{a:30,b:48,w:.8,B:1,why:"saison sèche qui s'allonge"},
+{a:6,b:48,w:.8,B:1,why:"seuil de 20-25 % de surface défrichée"},
+{a:48,b:7,w:.2,fb:1,B:1,why:"carbone de la forêt relâché"},
+{a:27,b:50,w:1,why:"effondrement des chaînes alimentaires"},
+{a:17,b:50,w:.6,why:"stocks qui migrent vers les pôles"},
+{a:50,b:37,w:.6,why:"20 % des protéines animales de 3 milliards de personnes"},
+{a:36,b:52,w:1,B:1,why:"température humide au-delà du supportable"},
+{a:52,b:38,w:.6,B:1,why:"coups de chaleur, insuffisance rénale"},
+{a:52,b:42,w:.5,B:1,why:"ce sont les métiers exposés qui perdent leurs heures"},
+{a:26,b:51,w:.5,why:"sinistres inondation"},
+{a:33,b:51,w:.7,why:"littoraux inassurables"},
+{a:34,b:51,w:.7,why:"ouragans : les sinistres les plus coûteux"},
+{a:35,b:51,w:.5,why:"incendies de forêt et d'interface"},
+{a:51,b:42,w:.5,why:"se protéger coûte cher"}
+];
+
+/* ============================================================
+   MODÈLE PHYSIQUE — ordres de grandeur, calibré GIEC AR6
+   Référence : émissions maintenues jusqu'en 2100 → +2,75 °C
+   ============================================================ */
+const LEVERS=[
+ {k:"ind",n:"Industrie",min:0,max:200,step:5,def:100,suf:"%",note:"16 GtCO₂/an aujourd'hui"},
+ {k:"bat",n:"Bâtiments",min:0,max:200,step:5,def:100,suf:"%",note:"7 GtCO₂/an — chauffage, clim"},
+ {k:"tra",n:"Transport",min:0,max:200,step:5,def:100,suf:"%",note:"10 GtCO₂/an — 90 % de pétrole"},
+ {k:"agr",n:"Agriculture et élevage",min:0,max:200,step:5,def:100,suf:"%",note:"4 GtCO₂ + 8 GtCO₂e de CH₄ et N₂O"},
+ {k:"def",n:"Déforestation",min:0,max:200,step:5,def:100,suf:"%",note:"4,5 GtCO₂/an nettes"},
+ {k:"low",n:"Part des énergies bas-carbone",min:0,max:90,step:2,def:18,suf:"%",note:"18 % du mix primaire aujourd'hui",abs:1},
+ {k:"sink",n:"Puits de carbone naturels",min:40,max:160,step:5,def:100,suf:"%",note:"forêts, sols et océan : 55 % de nos émissions"},
+ {k:"ccs",n:"Captage et stockage du CO₂",min:0,max:12,step:.5,def:0,suf:" Gt/an",note:"0,05 Gt/an captées en 2024",abs:1}
+];
+const PRESETS=[
+ {n:"Trajectoire actuelle",s:{}},
+ {n:"Carburant +50 %",s:{tra:150}},
+ {n:"Sobriété + renouvelables",s:{ind:70,bat:60,tra:55,agr:85,def:40,low:70,sink:115,ccs:1}},
+ {n:"Neutralité carbone",s:{ind:40,bat:30,tra:30,agr:65,def:10,low:85,sink:130,ccs:5}},
+ {n:"Tout sur la technologie",s:{ind:115,bat:110,tra:115,agr:105,def:90,low:45,sink:100,ccs:8}},
+ {n:"Croissance fossile",s:{ind:150,bat:140,tra:160,agr:125,def:135,low:8,sink:85,ccs:0}}
+];
+const CAL={dt:2.75,co2:41.5,ghg:12.3};
+
+const S={}; LEVERS.forEach(l=>S[l.k]=l.def);
+
+function physics(S){
+  const I=S.ind/100,B=S.bat/100,T=S.tra/100,A=S.agr/100,D=S.def/100;
+  const ci=(1-S.low/100)/(1-.18);
+  const fossil=Math.max(0,(16*I+7*B+10*T+4*A)*ci);
+  const luc=4.5*D;
+  let dT=CAL.dt,co2=CAL.co2,other=CAL.ghg,ppm=CAL.ppm,af=CAL.af,aer=1,forc=CAL.forc,perma=.5;
+  for(let i=0;i<80;i++){
+    const r=Math.max(0,dT/CAL.dt), r2=r*r;
+    perma=.5*r2;
+    const fire=.3*r2, amaz=.25*r2*D;
+    co2=Math.max(0,fossil+luc+perma+fire+amaz-S.ccs);
+    aer=fossil/37;
+    other=8*A+2.5*aer+1.5*I+.3*r2;
+    af=Math.min(.85,Math.max(.18,(.45/(S.sink/100))*(1+.12*(co2/CAL.co2-1))));
+    const cumul=co2*75;
+    ppm=420+af*cumul/7.8;
+    const albedo=Math.pow(r,1.2);
+    forc=5.35*Math.log(ppm/278)+.9*(other/CAL.ghg)-1*aer+.2*albedo;
+    const target=1.4+.45*cumul/1000+.35*(other/CAL.ghg)-.4*aer;
+    dT+=.4*(target-dT);
+  }
+  const slr=.21+.133*dT, ph=8.05-.000462*(ppm-420);
+  const sinkflux=(1-af)*co2, budget=co2>.2?275/co2:999;
+  return {fossil,luc,co2,other,aer,af,ppm,forc,dT,slr,ph,sinkflux,budget,perma,
+          imbalance:.25*forc};
+}
+/* référence = état des curseurs « trajectoire actuelle » : tous les % de la fresque s'y comparent */
+const REF=(function(){const d={};LEVERS.forEach(l=>d[l.k]=l.def);const p=physics(d);
+  return {co2:p.co2,ghg:p.other,ppm:p.ppm,dt:p.dT,forc:p.forc,slr:p.slr,ph:p.ph,sinkflux:p.sinkflux,af:p.af};})();
+const fr=(v,d=1)=>v.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
+const ANCHOR={
+ co2 :p=>({i:p.co2/REF.co2,      v:fr(p.co2)+" Gt/an"}),
+ ghg :p=>({i:p.other/REF.ghg,    v:fr(p.other)+" GtCO₂e"}),
+ sink:p=>({i:p.sinkflux/REF.sinkflux, v:Math.round((1-p.af)*100)+" % absorbés"}),
+ ppm :p=>({i:(p.ppm-280)/(REF.ppm-280), v:Math.round(p.ppm)+" ppm"}),
+ ph  :p=>({i:Math.max(0,(8.05-p.ph)/(8.05-REF.ph)), v:fr(p.ph,2)+" pH"}),
+ forc:p=>({i:p.forc/REF.forc,    v:fr(p.forc)+" W/m²"}),
+ ener:p=>({i:p.forc/REF.forc,    v:Math.round(p.imbalance*16)+" ZJ/an"}),
+ dt  :p=>({i:p.dT/REF.dt,        v:"+"+fr(p.dT)+" °C"}),
+ slr :p=>({i:p.slr/REF.slr,      v:"+"+Math.round(p.slr*100)+" cm"}),
+ lowc:(p,S)=>({i:S.low/18,       v:S.low+" %"}),
+ ccs :(p,S)=>({i:1+S.ccs*2,      v:fr(S.ccs)+" Gt/an"})
+};
+NODES.find(n=>n.id===14).anchor="ener";
+
+/* ---- propagation dans le graphe ---- */
+const byId={}; NODES.forEach(n=>byId[n.id]=n);
+const IN={}, OUT={};
+NODES.forEach(n=>{IN[n.id]=[];OUT[n.id]=[];});
+EDGES.forEach(e=>{ if(byId[e.a]&&byId[e.b]){IN[e.b].push(e);OUT[e.a].push(e);} });
+const LEVERNODE={2:"ind",3:"bat",4:"tra",8:"agr",6:"def"};
+
+function compute(){
+  const p=physics(S), idx={};
+  NODES.forEach(n=>idx[n.id]=1);
+  const bonus=document.getElementById("tg-bonus").checked;
+  const fixed={};
+  for(const id in LEVERNODE) fixed[id]=S[LEVERNODE[id]]/100;
+  fixed[1]=(S.ind+S.bat+S.tra+S.agr)/400;
+  fixed[5]=p.fossil/37;
+  fixed[44]=1; fixed[43]=S.low/18; fixed[45]=S.sink/100; fixed[46]=1+S.ccs*2;
+  NODES.forEach(n=>{ if(n.anchor){const a=ANCHOR[n.anchor](p,S); idx[n.id]=Math.max(0,a.i);} });
+  Object.keys(fixed).forEach(k=>idx[k]=Math.max(0,fixed[k]));
+  const anchored=new Set(NODES.filter(n=>n.anchor).map(n=>n.id).concat(Object.keys(fixed).map(Number)));
+  for(let it=0;it<60;it++){
+    for(const n of NODES){
+      if(anchored.has(n.id)) continue;
+      if(!bonus&&n.b) continue;
+      let s=0,w=0;
+      for(const e of IN[n.id]){
+        if(!bonus&&(e.B||byId[e.a].b)) continue;
+        let v=idx[e.a]; if(e.neg) v=2-v;
+        s+=(e.w||1)*Math.max(0,v); w+=(e.w||1);
+      }
+      if(!w) continue;
+      idx[n.id]=Math.pow(Math.max(0,s/w),n.g||1);
+    }
+  }
+  return {p,idx};
+}
+
+const COL={warm:"var(--up)",cool:"var(--down)",ink3:"var(--ink-3)"};
+
+/* ============================================================
+   « CE QUE ÇA VEUT DIRE » — un repère concret par carte,
+   puis une phrase recalculée à partir du scénario en cours
+   ============================================================ */
+const REPERE={
+1:"8 milliards d'humains, mais l'empreinte n'a rien d'uniforme : ≈ 9 tCO₂e par an et par Français, 2,5 par Indien, 0,1 par Congolais.",
+2:"Fabriquer une tonne d'acier émet ≈ 1,8 t de CO₂, une tonne de ciment ≈ 0,9 t. Le ciment seul pèse 7 % des émissions mondiales.",
+3:"Un logement mal isolé consomme quatre fois plus qu'un logement rénové. En France, le bâtiment absorbe 45 % de l'énergie du pays.",
+4:"Un aller-retour Paris–New York émet ≈ 1,7 tCO₂ par passager : l'équivalent de 10 000 km en voiture, en huit heures.",
+5:"Brûler un litre d'essence émet 2,4 kg de CO₂ — trois fois le poids du litre, parce que le carbone se lie à l'oxygène de l'air.",
+6:"Un hectare de forêt tropicale stocke ≈ 250 t de CO₂. Il en disparaît 10 millions d'hectares par an : un terrain de football toutes les deux secondes.",
+7:"Le CO₂ est le seul gaz dont l'effet se mesure en siècles : un quart de ce qui est émis aujourd'hui sera encore dans l'air dans 1 000 ans.",
+8:"Un kilo de bœuf émet ≈ 30 kgCO₂e, un kilo de lentilles ≈ 0,9. L'élevage occupe 80 % des terres agricoles pour 20 % des calories.",
+9:"Une molécule de méthane réchauffe 80 fois plus que le CO₂ sur vingt ans, mais elle disparaît en douze ans. Le CO₂, lui, reste.",
+10:"Les aérosols nous masquent ≈ 0,4 °C de réchauffement. Arrêter de brûler du charbon lève ce parasol en quelques semaines ; le CO₂, lui, reste des siècles.",
+11:"Le CO₂ se mélange en un an dans toute l'atmosphère : celui d'une centrale chinoise réchauffe la France exactement autant que le nôtre.",
+12:"Sans eux, l'atmosphère aurait déjà dépassé 500 ppm. Mais un océan qui se réchauffe absorbe moins bien : le service se dégrade au moment où l'on en a le plus besoin.",
+13:"Les gaz à effet de serre représentent moins de 0,1 % de l'atmosphère. L'azote et l'oxygène, qui en font 99 %, n'y jouent aucun rôle.",
+14:"Un déséquilibre d'un watt par mètre carré paraît dérisoire. Multiplié par la surface du globe et par un siècle, c'est ce qui déplace les climats.",
+15:"Le forçage se mesure en watts par mètre carré, sur toute la surface du globe, jour et nuit, sans interruption depuis un siècle et demi.",
+16:"Les glaciers alpins ont perdu la moitié de leur volume depuis 1900. Ils servent de tampon : ils rendent en été l'eau tombée en hiver.",
+17:"L'océan a encaissé 91 % de l'excès de chaleur. Si l'atmosphère avait dû l'absorber seule, elle aurait gagné des dizaines de degrés.",
+18:"Elle a perdu 40 % de sa surface d'été depuis 1979 : l'équivalent de dix fois la France, en quarante ans.",
+19:"Le Groenland perd ≈ 270 Gt de glace par an — un cube de 6,5 km de côté, chaque année.",
+20:"Une atmosphère plus chaude n'est pas plus humide partout : elle aspire l'eau des sols déjà secs pour la déverser ailleurs, plus fort.",
+21:"Une moyenne mondiale ne se ressent nulle part : les terres chauffent 1,4 fois plus vite que cette moyenne, et l'Arctique 2,5 fois plus.",
+22:"Ce n'est pas la moyenne qui noie, c'est la tempête posée dessus. Quelques dizaines de centimètres suffisent à rendre régulière une submersion rare.",
+23:"Construire une coquille demande des ions carbonate. L'acidification les consomme : le même animal doit dépenser plus d'énergie pour le même abri.",
+24:"L'acidité se mesure sur une échelle logarithmique : −0,1 de pH, c'est déjà +30 % d'ions H⁺ dans l'eau.",
+25:"Une forêt migre de quelques dizaines de mètres par siècle. Le climat, lui, se déplace de plusieurs kilomètres par an.",
+26:"Une pluie qui tombe sur un sol sec et croûté ruisselle au lieu de s'infiltrer : la sécheresse aggrave l'inondation au lieu de la compenser.",
+27:"L'océan a perdu 2 % de son oxygène en cinquante ans. Un poisson n'a pas de climatisation : il part, ou il meurt.",
+28:"Le moustique tigre était absent de France métropolitaine en 2004. Il est aujourd'hui installé dans plus de 70 départements.",
+29:"Ces organismes microscopiques nourrissent les chaînes alimentaires marines et fabriquent, en mourant, une bonne part des roches calcaires du globe.",
+30:"Une sécheresse ne se voit pas arriver, elle s'installe : en 2022, les nappes françaises étaient vides avant même le début de l'été.",
+31:"Deux milliards de personnes dépendent de l'eau de fonte des montagnes. La neige d'hiver est un barrage gratuit — qui disparaît.",
+32:"Chaque degré coûte ≈ 6 % de rendement au blé et ≈ 7 % au maïs. Les gains des hautes latitudes ne compensent pas les pertes tropicales.",
+33:"Il n'est pas nécessaire que la mer recouvre les terres : bien avant, le sel remonte dans les nappes et rend les sols incultivables.",
+34:"Un cyclone tire son énergie d'une eau à plus de 26 °C. Leur nombre ne devrait pas augmenter — leur puissance et leurs pluies, si.",
+35:"Un mégafeu relâche en quelques jours le carbone stocké en un siècle. Le Canada a brûlé 18 Mha en 2023, sept fois sa moyenne.",
+36:"La canicule de 2003 a fait ≈ 70 000 morts en Europe. Elle était alors considérée comme un événement exceptionnel.",
+37:"Le monde produit de quoi nourrir 10 milliards d'humains. Ce sont les chocs simultanés sur plusieurs greniers, et les prix, qui affament.",
+38:"L'OMS classe le climat comme la première menace sanitaire du siècle : chaleur, maladies vectorielles, malnutrition, pollution, santé mentale.",
+39:"L'essentiel des déplacements est interne et régional : on part à 50 km, pas à 5 000. Les plus pauvres sont ceux qui bougent le moins.",
+40:"Le climat ne déclenche pas les guerres : il tend les ressources — eau, terres, prix du pain — sur des sociétés déjà fragiles.",
+41:"Ce dégel ne se commande pas : une fois lancé, il continue même si nous cessons toute émission. C'est ce qui le distingue de nos usines.",
+42:"Le premier déterminant d'une empreinte carbone n'est ni le pays ni l'âge : c'est le revenu.",
+43:"Le bas-carbone progresse vite dans l'électricité — mais l'électricité ne représente que 20 % de l'énergie finale consommée.",
+44:"La sobriété n'est pas la privation : c'est décider de ce dont on a besoin avant de choisir comment le produire.",
+45:"Un arbre stocke ≈ 20 kg de CO₂ par an une fois adulte. Compenser un aller-retour Paris–New York demande 85 arbres pendant vingt ans.",
+46:"Capter une gigatonne de CO₂ mobiliserait ≈ 1 % de l'énergie mondiale. Nous en captons aujourd'hui 0,05.",
+47:"Le Gulf Stream et sa circulation profonde transportent mille fois le débit de l'Amazone. C'est ce qui donne à Paris un climat plus doux qu'à Terre-Neuve, à latitude égale.",
+48:"L'Amazonie recycle sa propre pluie cinq à six fois avant qu'elle n'atteigne les Andes. Sous un certain couvert, la machine s'arrête d'elle-même.",
+49:"Ce sont les mêmes cheminées : chaque tonne de CO₂ évitée évite aussi des particules. Le bénéfice sanitaire est immédiat et local, il n'attend pas 2100.",
+50:"Les stocks de poissons remontent vers les pôles de ≈ 50 km par décennie : les zones de pêche quittent les eaux de ceux qui en dépendent le plus.",
+51:"Le risque devient inassurable bien avant d'être invivable : l'assureur part le premier, et la valeur du bien s'effondre avec lui.",
+52:"Ce seuil n'a presque jamais été franchi dans l'histoire humaine. Il l'a été une poignée de fois depuis 2000, dans le Golfe et en Asie du Sud."
+};
+const erf=x=>{const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+.3275911*x);
+  return s*(1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x));};
+const cdf=z=>.5*(1+erf(z/Math.SQRT2));
+const pct0=d=>(d>0?"+":"−")+Math.round(Math.abs(d)*100)+" %";
+function retour(dT){                    /* fréquence d'un été extrême du climat préindustriel */
+  const loc=dT*1.4, sg=1.2*1.07, P=1-cdf((2.4-loc)/sg);
+  return P<=0?999:1/P;
+}
+function courbe(dT){
+  const W=286,H=92,x0=-3,x1=9,sc=x=>(x-x0)/(x1-x0)*W;
+  const g=(x,m,s)=>Math.exp(-((x-m)**2)/(2*s*s))/s;
+  const loc=dT*1.4, s2=1.2*1.07, top=g(0,0,1.2);
+  const pts=(m,s)=>{let d="";for(let i=0;i<=72;i++){const x=x0+(x1-x0)*i/72;
+    d+=(i?"L":"M")+sc(x).toFixed(1)+","+(H-4-g(x,m,s)/top*(H-22)).toFixed(1);}return d;};
+  let fill="M"+sc(2.4).toFixed(1)+","+(H-4);
+  for(let i=0;i<=40;i++){const x=2.4+(x1-2.4)*i/40;
+    fill+="L"+sc(x).toFixed(1)+","+(H-4-g(x,loc,s2)/top*(H-22)).toFixed(1);}
+  fill+="L"+W+","+(H-4)+"Z";
+  return `<svg viewBox="0 0 ${W} ${H+16}" width="100%" style="display:block;margin:10px 0 2px" role="img"
+    aria-label="La courbe des étés se décale vers la droite : ce qui était extrême devient banal.">
+    <path d="${fill}" fill="${COL.warm}" opacity=".16"/>
+    <path d="${pts(0,1.2)}" fill="none" stroke="${COL.ink3}" stroke-width="1.5"/>
+    <path d="${pts(loc,s2)}" fill="none" stroke="${COL.warm}" stroke-width="2"/>
+    <line x1="${sc(2.4)}" y1="6" x2="${sc(2.4)}" y2="${H-4}" stroke="${COL.ink3}" stroke-width="1" stroke-dasharray="3 3"/>
+    <text x="${sc(0)}" y="${H+12}" font-size="10" fill="${COL.ink3}" text-anchor="middle">1900</text>
+    <text x="${sc(2.4)+4}" y="13" font-size="10" fill="${COL.ink3}">extrême de 1900</text>
+    <text x="${Math.min(W-2,sc(loc))}" y="${H+12}" font-size="10" fill="${COL.warm}" text-anchor="middle">ce scénario</text>
+  </svg>`;
+}
+const DYN={
+ 7:s=>`Ce scénario rejette ${fr(s.p.co2)} Gt de CO₂ par an, soit ≈ ${Math.round(s.p.co2*1e9/31.5e6)} tonnes chaque seconde.`,
+ 9:s=>`${fr(s.p.other)} GtCO₂e par an, dont l'essentiel en méthane : le gaz sur lequel une baisse se voit en une décennie, pas en un siècle.`,
+ 10:s=>`Les aérosols sont à ${pct0(s.idx[10]-1)} de la trajectoire actuelle. Moins de combustion, c'est un air plus respirable — et un parasol en moins.`,
+ 11:s=>{const c=s.p.ppm;return `${Math.round(c)} ppm : un niveau que la Terre n'avait plus connu depuis ${c<450?"≈ 3 millions":c<600?"15 à 30 millions":"plus de 30 millions"} d'années.`;},
+ 12:s=>`Les puits absorbent ${Math.round((1-s.p.af)*100)} % des émissions, soit ${fr(s.p.sinkflux)} Gt par an. Sans eux, la concentration monterait deux fois plus vite.`,
+ 14:s=>`≈ ${Math.round(s.p.imbalance*16)} zettajoules accumulés par an, soit l'équivalent de ${Math.round(s.p.imbalance*5.1e14/63e12)} bombes d'Hiroshima par seconde, en continu.`,
+ 15:s=>`${fr(s.p.forc)} W/m² : multiplié par la surface du globe, c'est ${Math.round(s.p.forc*5.1e14/1e12)} térawatts injectés en permanence — mille fois la puissance électrique mondiale.`,
+ 17:s=>`+${fr(s.p.dT)} °C en moyenne mondiale : l'océan de surface se réchauffe un peu moins, mais il ne redescendra pas avant des siècles.`,
+ 21:s=>{const r=retour(s.p.dT);
+   return `Sur les terres françaises, cela fait ≈ +${fr(s.p.dT*1.4)} °C, et ≈ +${fr(s.p.dT*2.5)} °C en Arctique.<br><br>`+
+   `Un été aussi chaud que le plus chaud de 1900 revenait alors une année sur 44. Dans ce scénario : `+
+   `<b>${r<1.3?"presque chaque année":"environ une année sur "+Math.round(r)}</b>.`+courbe(s.p.dT)+
+   `<span style="font-size:12px;opacity:.75">Le dernier âge glaciaire était ≈ 5 °C sous l'époque préindustrielle, avec trois kilomètres de glace sur le Canada. Nous parcourons l'écart inverse plus de vingt fois plus vite.</span>`;},
+ 22:s=>`+${Math.round(s.p.slr*100)} cm d'ici 2100 — et la hausse ne s'arrête pas en 2100 : elle est engagée pour des siècles.`,
+ 24:s=>`pH ${fr(s.p.ph,2)}, soit ${Math.round((Math.pow(10,8.2-s.p.ph)-1)*100)} % d'ions H⁺ de plus qu'en 1850.`,
+ 32:s=>`${pct0(s.idx[32]-1)} par rapport à la trajectoire actuelle. À l'échelle d'un pays, quelques pour cent de rendement en moins suffisent à faire flamber les prix.`,
+ 36:s=>{const r=retour(s.p.dT);
+   return `Un été de type 2003 revient ici <b>${r<1.3?"presque chaque année":"environ une année sur "+Math.round(r)}</b>. Ce qui était exceptionnel devient la normale — et le nouvel exceptionnel se situe bien plus haut.`;},
+ 41:s=>`≈ ${fr(s.p.perma*1.6)} Gt de CO₂e s'échappent chaque année des sols dégelés : l'équivalent de ${Math.round(s.p.perma*1.6/.4)} fois les émissions annuelles de la France, sans qu'aucun humain n'y soit pour quelque chose.`
+};
+function qualif(d){const a=Math.abs(d);
+  return a<.005?"identique à la trajectoire actuelle":a<.08?"écart léger":a<.25?"écart net":a<.6?"écart majeur":"changement de régime";}
+function meaning(id,s){
+  const n=byId[id], d=s.idx[id]-1;
+  const dyn=DYN[id]?DYN[id](s):
+    `${n.m.charAt(0).toUpperCase()+n.m.slice(1)} : ${Math.abs(d)<.005?"comme sur la trajectoire actuelle":pct0(d)+" — "+qualif(d)}.`;
+  return (REPERE[id]?`<p>${REPERE[id]}</p>`:"")+`<p class="dyn">${dyn}</p>`;
+}
+
+/* ============================================================
+   RENDU
+   ============================================================ */
+const CW=156,CH=88,VW=2740,VH=1090,BOT=1048;
+const X=n=>60+n.L*176, Y=n=>60+n.R*108;
+const NS="http://www.w3.org/2000/svg";
+const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
+const board=document.getElementById("board");
+board.setAttribute("viewBox",`0 0 ${VW} ${VH}`);
+
+const defs=el("defs");
+["act","ene","atm","phy","eco","hum"].forEach(f=>{
+  const m=el("marker",{id:"ar-"+f,viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidth:"6",markerHeight:"6",orient:"auto-start-reverse",class:"mk mk-"+f});
+  m.appendChild(el("path",{d:"M0,1 L10,5 L0,9 z"})); defs.appendChild(m);
+});
+board.appendChild(defs);
+const gWorld=el("g",{id:"world"}), gEdge=el("g"), gNode=el("g"), gLab=el("g");
+gWorld.appendChild(gEdge); gWorld.appendChild(gNode); gWorld.appendChild(gLab);
+board.appendChild(gWorld);
+
+function wrap(txt,max){
+  const w=txt.split(" "),out=[];let l="";
+  for(const x of w){ if(!l) l=x; else if((l+" "+x).length<=max) l+=" "+x; else {out.push(l);l=x;} }
+  if(l)out.push(l); return out.slice(0,3);
+}
+function edgePath(s,t){
+  const sx=X(s)+CW, sy=Y(s)+CH/2, tx=X(t), ty=Y(t)+CH/2;
+  if(tx>sx-30){ const dx=Math.max(38,(tx-sx)*.45);
+    return `M${sx},${sy} C${sx+dx},${sy} ${tx-dx},${ty} ${tx},${ty}`; }
+  const scx=X(s)+CW/2, tcx=X(t)+CW/2;
+  if(Math.abs(X(s)-X(t))<300){          // retour local : crochet par la gauche
+    const d=90+.12*Math.abs(Y(s)-Y(t));
+    return `M${X(s)},${sy} C${X(s)-d},${sy} ${X(t)-d},${ty} ${X(t)},${ty}`; }
+  if(s.R<=3){ const yc=16;
+    return `M${scx},${Y(s)} C${scx},${yc} ${tcx},${yc} ${tcx},${Y(t)}`; }
+  return `M${scx},${Y(s)+CH} C${scx},${BOT} ${tcx},${BOT} ${tcx},${Y(t)+CH}`;
+}
+/* --- edges --- */
+const edgeEls=[];
+EDGES.forEach(e=>{
+  const s=byId[e.a],t=byId[e.b]; if(!s||!t) return;
+  const p=el("path",{d:edgePath(s,t),class:"edge"+(e.fb?" fb":""),stroke:FAM[s.f].c,
+    "marker-end":"url(#ar-"+s.f+")"});
+  if(e.neg) p.setAttribute("stroke-dasharray","1.5 3.5");
+  gEdge.appendChild(p); edgeEls.push({e,p,s,t});
+});
+/* --- cards --- */
+const cardEls={};
+NODES.forEach(n=>{
+  const x=X(n),y=Y(n);
+  const g=el("g",{class:"card"+(n.b?" bonus":""),transform:`translate(${x},${y})`,tabindex:"0",role:"button"});
+  g.appendChild(el("title",{})).textContent=n.n;
+  g.appendChild(el("rect",{class:"bg",x:0,y:0,width:CW,height:CH,rx:3}));
+  g.appendChild(el("line",{class:"accentbar",x1:1.5,y1:6,x2:1.5,y2:CH-6,stroke:FAM[n.f].c}));
+  const id=el("text",{class:"id",x:11,y:19}); id.textContent=String(n.id).padStart(2,"0")+(n.x?"  +":""); g.appendChild(id);
+  wrap(n.n,19).forEach((ln,i)=>{const t=el("text",{class:"t",x:11,y:34+i*14});t.textContent=ln;g.appendChild(t);});
+  g.appendChild(el("rect",{class:"trk",x:11,y:CH-20,width:CW-22,height:4,rx:2,fill:"var(--surface-3)"}));
+  const fill=el("rect",{class:"fil",x:CW/2,y:CH-20,width:0,height:4,rx:2}); g.appendChild(fill);
+  const v=el("text",{class:"v",x:CW-11,y:CH-6,"text-anchor":"end"}); g.appendChild(v);
+  const vl=el("text",{class:"id",x:11,y:CH-6}); g.appendChild(vl);
+  gNode.appendChild(g);
+  cardEls[n.id]={g,fill,v,vl};
+  g.addEventListener("click",ev=>{ev.stopPropagation();select(n.id);});
+  g.addEventListener("keydown",ev=>{if(ev.key==="Enter"||ev.key===" "){ev.preventDefault();select(n.id);}});
+});
+
+/* ============================================================
+   ÉTAT + MISE À JOUR
+   ============================================================ */
+let sel=7, R=null;
+const pct=i=>Math.round((i-1)*100);
+const sgn=v=>(v>0?"+":"")+v;
+
+function update(){
+  R=compute();
+  const {p,idx}=R, bonus=document.getElementById("tg-bonus").checked,
+        showFb=document.getElementById("tg-fb").checked,
+        focus=document.getElementById("tg-focus").checked;
+  /* cartes */
+  NODES.forEach(n=>{
+    const c=cardEls[n.id], i=idx[n.id];
+    c.g.style.display=(!bonus&&n.b)?"none":"";
+    const d=Math.max(-1,Math.min(1,i-1));
+    c.fill.setAttribute("x",d>=0?CW/2:CW/2+d*(CW/2-11));
+    c.fill.setAttribute("width",Math.abs(d)*(CW/2-11));
+    c.fill.setAttribute("fill",d>=0?"var(--up)":"var(--down)");
+    const a=n.anchor?ANCHOR[n.anchor](p,S):null;
+    c.v.textContent=a?a.v:sgn(pct(i))+" %";
+    c.v.setAttribute("fill",Math.abs(i-1)<.005?"var(--ink-3)":(i>1?"var(--up)":"var(--down)"));
+    c.vl.textContent=a?sgn(pct(i))+" %":"";
+    c.g.classList.toggle("sel",n.id===sel);
+  });
+  /* chaîne causale : tout ce qui remonte jusqu'à la carte et tout ce qui en descend */
+  const live=e=>!((!bonus&&(e.B||byId[e.a].b||byId[e.b].b))||(!showFb&&e.fb));
+  const walk=(dir)=>{           // rétroactions exclues : elles reboucleraient sur toute la fresque
+    const seen=new Set(), q=[sel];
+    while(q.length){ const id=q.pop();
+      for(const e of (dir==="up"?IN[id]:OUT[id])){
+        if(!live(e)||e.fb) continue;
+        const nx=dir==="up"?e.a:e.b;
+        if(nx!==sel&&!seen.has(nx)){ seen.add(nx); q.push(nx); } } }
+    return seen; };
+  const up=walk("up"), down=walk("down");
+  const chain=new Set([sel,...up,...down]);
+  const inChain=e=>((up.has(e.a)||e.a===sel)&&(up.has(e.b)||e.b===sel))||
+                   ((down.has(e.a)||e.a===sel)&&(down.has(e.b)||e.b===sel));
+  edgeEls.forEach(({e,p:path,s,t})=>{
+    path.style.display=live(e)?"":"none";
+    const hot=(e.a===sel||e.b===sel);
+    path.classList.toggle("hot",hot);
+    path.classList.toggle("dim",focus&&!hot&&!inChain(e));
+  });
+  NODES.forEach(n=>cardEls[n.id].g.classList.toggle("dim",focus&&!chain.has(n.id)));
+  gLab.textContent="";
+  dials(p); levers(); detail();
+}
+
+/* --- bandeau d'indicateurs --- */
+const DIALS=[
+ {k:"Réchauffement 2100",g:p=>"+"+fr(p.dT)+" °C",r:REF.dt,v:p=>p.dT,alert:p=>p.dT>2},
+ {k:"CO₂ atmosphérique",g:p=>Math.round(p.ppm)+" ppm",r:REF.ppm,v:p=>p.ppm},
+ {k:"Émissions",g:p=>fr(p.co2)+" Gt/an",r:REF.co2,v:p=>p.co2},
+ {k:"Niveau marin",g:p=>"+"+Math.round(p.slr*100)+" cm",r:REF.slr,v:p=>p.slr},
+ {k:"pH de l'océan",g:p=>fr(p.ph,2),r:REF.ph,v:p=>p.ph,inv:1,abs:v=>sgn(fr(v,2))+" pH"},
+ {k:"Budget 1,5 °C",g:p=>p.budget>120?"> 120 ans":Math.round(p.budget)+" ans",r:275/REF.co2,v:p=>p.budget,inv:1}
+];
+function dials(p){
+  const c=document.getElementById("dials"); c.textContent="";
+  DIALS.forEach(d=>{
+    const v=d.v(p), rel=(v-d.r)/Math.abs(d.r), w=document.createElement("div");
+    w.className="dial"+(d.alert&&d.alert(p)?" alert":"");
+    const worse=d.inv?v<d.r:v>d.r, flat=d.abs?Math.abs(v-d.r)<.005:Math.abs(rel)<.005;
+    const delta=d.abs?d.abs(v-d.r):sgn(Math.round(rel*100))+" %";
+    w.innerHTML=`<span class="k">${d.k}</span><span class="v mono">${d.g(p)}</span>`+
+      `<span class="d mono ${flat?"":(worse?"up":"down")}">${flat?"trajectoire actuelle":delta}</span>`;
+    c.appendChild(w);
+  });
+}
+
+/* --- leviers --- */
+const leverRefs={};
+function buildLevers(){
+  const c=document.getElementById("levers");
+  LEVERS.forEach(l=>{
+    const d=document.createElement("div"); d.className="lever";
+    d.innerHTML=`<div class="lever-head"><span class="nm">${l.n}</span><span class="val mono" id="lv-${l.k}"></span></div>`;
+    const inp=document.createElement("input");
+    Object.assign(inp,{type:"range",min:l.min,max:l.max,step:l.step,value:S[l.k],id:"in-"+l.k});
+    inp.setAttribute("aria-label",l.n);
+    inp.addEventListener("input",()=>{S[l.k]=+inp.value;markPreset();update();});
+    d.appendChild(inp);
+    const n=document.createElement("div"); n.className="note"; n.textContent=l.note; d.appendChild(n);
+    c.appendChild(d); leverRefs[l.k]={inp,val:d.querySelector("#lv-"+l.k)};
+  });
+}
+function levers(){
+  LEVERS.forEach(l=>{
+    const r=leverRefs[l.k]; r.inp.value=S[l.k];
+    const base=l.def, v=S[l.k];
+    r.val.textContent=l.abs?fr(v,l.step<1?1:0)+l.suf:v+" %";
+    r.val.className="val mono "+(v>base?(l.k==="sink"||l.k==="low"||l.k==="ccs"?"down":"up"):v<base?(l.k==="sink"||l.k==="low"||l.k==="ccs"?"up":"down"):"");
+  });
+}
+function markPreset(cur){
+  document.querySelectorAll(".preset").forEach((b,i)=>{
+    const ok=cur!==undefined?i===cur:PRESETS[i]&&LEVERS.every(l=>S[l.k]===(PRESETS[i].s[l.k]??l.def));
+    b.setAttribute("aria-pressed",ok?"true":"false");
+  });
+}
+function buildPresets(){
+  const c=document.getElementById("presets");
+  PRESETS.forEach((p,i)=>{
+    const b=document.createElement("button"); b.className="preset"; b.textContent=p.n; b.setAttribute("aria-pressed","false");
+    b.onclick=()=>{LEVERS.forEach(l=>S[l.k]=p.s[l.k]??l.def);markPreset(i);update();};
+    c.appendChild(b);
+  });
+}
+/* --- fiche carte --- */
+function detail(){
+  const n=byId[sel], {p,idx}=R, i=idx[sel], a=n.anchor?ANCHOR[n.anchor](p,S):null;
+  const d=Math.max(-1,Math.min(1,i-1)), col=Math.abs(i-1)<.005?"var(--ink-3)":(i>1?"var(--up)":"var(--down)");
+  const bonus=document.getElementById("tg-bonus").checked;
+  const row=(e,dir)=>{
+    const o=byId[dir==="in"?e.a:e.b]; if(!o||(!bonus&&o.b)) return "";
+    const oi=idx[o.id], c=Math.abs(oi-1)<.005?"var(--ink-3)":(oi>1?"var(--up)":"var(--down)");
+    return `<button class="lk" data-go="${o.id}" data-dir="${dir}"><span class="n mono">${String(o.id).padStart(2,"0")}</span>`+
+      `<span><span class="t">${o.n}</span><span class="why">${e.neg?"↓ ":""}${e.why||""}${e.fb?" · rétroaction":""}</span></span>`+
+      `<span class="pct mono" style="color:${c}">${sgn(pct(oi))} %</span></button>`;
+  };
+  const ins=IN[sel].filter(e=>bonus||!e.B).map(e=>row(e,"in")).join("");
+  const outs=OUT[sel].filter(e=>bonus||!e.B).map(e=>row(e,"out")).join("");
+  document.getElementById("detail").innerHTML=`
+  <div class="d-head">
+    <div class="d-kicker"><span class="num">${String(n.id).padStart(2,"0")}</span>
+      <span class="fam" style="color:${FAM[n.f].c}">${FAM[n.f].n}</span></div>
+    <h2>${n.n}</h2>
+    <div class="d-metric"><span class="big mono" style="color:${col}">${a?a.v:sgn(pct(i))+" %"}</span>
+      <span class="cap">${a?n.m+" · "+sgn(pct(i))+" %":n.m+" vs actuel"}</span></div>
+    <div class="bar"><span class="mid"></span>
+      <i style="background:${col};left:${d>=0?50:50+d*50}%;width:${Math.abs(d)*50}%"></i></div>
+  </div>
+  <div class="d-body"><p>${n.d}</p>
+  <div class="mean">${meaning(sel,{p,idx})}</div>${(n.b||n.x)?'<p style="color:var(--ink-3);font-size:12.5px">Carte ajoutée en complément : elle ne fait pas partie des 42 cartes officielles.</p>':""}</div>
+  ${ins?`<div class="links"><h3>Ce qui la provoque</h3>${ins}</div>`:'<div class="empty">Point de départ de la fresque : aucune carte en amont.</div>'}
+  ${outs?`<div class="links"><h3>Ce qu'elle provoque</h3>${outs}</div>`:'<div class="empty">Bout de chaîne : aucune carte en aval.</div>'}
+  <div class="foot">Valeurs affichées pour 2100, si le niveau d'émissions choisi était maintenu. Le pourcentage compare au scénario « trajectoire actuelle » (≈ +2,8 °C).</div>`;
+  document.getElementById("detail").querySelectorAll("[data-go]").forEach(b=>{
+    b.onclick=()=>select(+b.dataset.go);
+    const o=+b.dataset.go, inrow=b.dataset.dir==="in";
+    b.onmouseenter=()=>showEdge(inrow?o:sel, inrow?sel:o);
+    b.onmouseleave=()=>showEdge(null);
+  });
+}
+/* étiquette d'une flèche, au survol d'un lien dans la fiche */
+function showEdge(a,b){
+  gLab.textContent="";
+  edgeEls.forEach(o=>o.p.classList.remove("flash"));
+  if(a==null) return;
+  const o=edgeEls.find(o=>o.e.a===a&&o.e.b===b); if(!o||o.p.style.display==="none") return;
+  o.p.classList.add("flash");
+  const L=o.p.getTotalLength(), pt=o.p.getPointAtLength(L*.5);
+  const g=el("g",{});
+  const txt=el("text",{class:"elab",x:pt.x,y:pt.y-8,"text-anchor":"middle",
+    style:"paint-order:stroke;stroke:var(--paper);stroke-width:5px;stroke-linejoin:round"});
+  txt.textContent=o.e.why||""; g.appendChild(txt); gLab.appendChild(g);
+}
+function select(id){ sel=id; update(); ensureVisible(id);
+  const c=cardEls[id]; if(c) c.g.parentNode.appendChild(c.g);
+  if(window.innerWidth<=900) document.getElementById("detail").scrollIntoView({behavior:"smooth",block:"start"});
+}
+/* --- pan / zoom --- */
+let k=1,tx=0,ty=0;
+const stage=document.getElementById("stage");
+function applyT(){gWorld.setAttribute("transform",`translate(${tx},${ty}) scale(${k})`);}
+function box(){const r=stage.getBoundingClientRect();board.setAttribute("viewBox",`0 0 ${r.width} ${r.height}`);return r;}
+function fit(){
+  const r=box(), sw=r.width/VW, sh=r.height/VH;
+  k=Math.min(sw,sh)*.98; tx=(r.width-VW*k)/2; ty=(r.height-VH*k)/2; applyT();
+}
+function home(){
+  const r=box();
+  k=Math.min(1.05,Math.max(.5,(r.height-20)/900));
+  tx=-22*k; ty=-16*k; applyT(); ensureVisible(sel);
+}
+function ensureVisible(id){
+  const n=byId[id]; if(!n) return; const r=stage.getBoundingClientRect(), m=54;
+  const x0=X(n)*k+tx, y0=Y(n)*k+ty, x1=x0+CW*k, y1=y0+CH*k;
+  if(x0<m) tx+=m-x0; else if(x1>r.width-m) tx-=x1-(r.width-m);
+  if(y0<m) ty+=m-y0; else if(y1>r.height-m) ty-=y1-(r.height-m);
+  applyT();
+}
+function zoom(f,cx,cy){
+  const r=stage.getBoundingClientRect();
+  cx=cx??r.width/2; cy=cy??r.height/2;
+  const nk=Math.max(.12,Math.min(3,k*f));
+  tx=cx-(cx-tx)*nk/k; ty=cy-(cy-ty)*nk/k; k=nk; applyT();
+}
+let drag=null;
+stage.addEventListener("pointerdown",e=>{if(e.target.closest&&e.target.closest(".zoomctl"))return;drag={x:e.clientX,y:e.clientY,tx,ty};stage.setPointerCapture(e.pointerId);stage.classList.add("dragging");});
+stage.addEventListener("pointermove",e=>{if(!drag)return;tx=drag.tx+(e.clientX-drag.x);ty=drag.ty+(e.clientY-drag.y);applyT();});
+["pointerup","pointercancel"].forEach(t=>stage.addEventListener(t,()=>{drag=null;stage.classList.remove("dragging");}));
+stage.addEventListener("wheel",e=>{e.preventDefault();const r=stage.getBoundingClientRect();
+  zoom(e.deltaY<0?1.12:1/1.12,e.clientX-r.left,e.clientY-r.top);},{passive:false});
+document.getElementById("z-in").onclick=()=>zoom(1.25);
+document.getElementById("z-out").onclick=()=>zoom(1/1.25);
+document.getElementById("z-fit").onclick=fit;
+document.getElementById("z-home").onclick=home;
+addEventListener("resize",()=>box());
+/* --- légende, init --- */
+document.getElementById("legend").innerHTML=Object.keys(FAM).map(f=>
+  `<div class="row"><span class="swatch" style="background:${FAM[f].c}"></span>${FAM[f].n}</div>`).join("")+
+  `<div class="row" style="margin-top:2px"><svg width="22" height="8" aria-hidden="true"><line x1="0" y1="4" x2="22" y2="4" stroke="var(--ink-3)" stroke-width="1.6" stroke-dasharray="5 4"/></svg>Boucle de rétroaction</div>`+
+  `<div class="row"><svg width="22" height="8" aria-hidden="true"><line x1="0" y1="4" x2="22" y2="4" stroke="var(--ink-3)" stroke-width="1.6" stroke-dasharray="1.5 3.5"/></svg>Effet inverse (refroidissant)</div>`;
+["tg-bonus","tg-fb","tg-focus"].forEach(id=>document.getElementById(id).addEventListener("change",update));
+document.getElementById("btn-reset").onclick=()=>{LEVERS.forEach(l=>S[l.k]=l.def);markPreset(0);update();};
+window.select=select;
+buildPresets(); buildLevers(); markPreset(0); update(); home();
+setTimeout(()=>{const h=document.getElementById("stagehint");if(h)h.style.opacity=".0";},6000);
+document.getElementById("stagehint").style.transition="opacity .8s";
+</script>
+
+</body>
+</html>

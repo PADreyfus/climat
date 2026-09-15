@@ -1,0 +1,45 @@
+# Publie le site statique sur GitHub Pages à chaque push sur la branche principale.
+#
+# À activer une fois dans Settings → Pages → Build and deployment → Source :
+# « GitHub Actions ». Rien d'autre à configurer : le site est servi tel quel,
+# il n'y a pas d'étape de compilation.
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Vérifier que les pages servies sont à jour avec src/
+        run: |
+          node tools/build.mjs
+          if ! git diff --quiet -- '*.html'; then
+            echo "::error::Les pages de la racine ne correspondent pas à src/. Lancez 'node tools/build.mjs' et committez le résultat."
+            git diff --stat -- '*.html'
+            exit 1
+          fi
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4

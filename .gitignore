@@ -1,0 +1,16 @@
+# systèmes
+.DS_Store
+Thumbs.db
+
+# éditeurs
+.vscode/
+.idea/
+*.swp
+
+# node (le projet n'en a pas besoin, mais au cas où)
+node_modules/
+npm-debug.log*
+
+# temporaire
+*.tmp
+.cache/
