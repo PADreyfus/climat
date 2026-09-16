@@ -110,6 +110,13 @@ svg#board{display:block;width:100%;height:100%}
 #out-key b{font-weight:650} #out-key b.w{color:var(--warm)} #out-key b.c{color:var(--cool)}
 #out-key .lk{display:inline-flex;align-items:center;gap:4px;color:var(--ink-2)}
 #out-key svg{vertical-align:-1px}
+#src-b{display:block;margin-top:6px;font-size:11.5px;font-weight:650;color:var(--accent);cursor:pointer}
+.srcgrp{margin-top:16px}
+.srcgrp h4{font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:0 0 7px}
+.srcgrp ul{margin:0;padding:0;list-style:none;background:var(--card);border-radius:var(--r);overflow:hidden}
+.srcgrp li{padding:10px 13px;font-size:13px;line-height:1.45;position:relative}
+.srcgrp li+li::before{content:"";position:absolute;left:13px;right:0;top:0;height:1px;background:var(--hair);transform:scaleY(.5)}
+.srcgrp li b{font-weight:650} .srcgrp li em{font-style:normal;color:var(--ink-3);display:block;font-size:12px;margin-top:1px}
 #hero .chip{display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;
   background:var(--fill);margin-left:7px;vertical-align:3px}
 
@@ -177,7 +184,11 @@ svg#board{display:block;width:100%;height:100%}
 .row .cv{color:var(--ink-3);font-size:16px;flex:none;margin-left:2px}
 /* curseur de la fiche */
 .mean{background:var(--card);border-radius:var(--r);padding:13px 15px;font-size:14px;line-height:1.5;color:var(--ink-2)}
-.mean p{margin:0} .mean p+p{margin-top:9px} .mean .dyn{color:var(--ink)} .mean b{font-weight:650}
+.mean p{margin:0} .mean p+p{margin-top:9px}
+.mean .ville{margin:12px 0;padding:11px 13px;border-radius:10px;background:var(--fill);font-size:13.5px;line-height:1.55}
+.mean .ville em{display:block;font-style:normal;font-size:11.5px;color:var(--ink-3);margin-top:7px;line-height:1.4}
+.mean select{font:inherit;font-weight:650;color:var(--ink);background:var(--card);border:.5px solid var(--hair);
+  border-radius:7px;padding:3px 7px;margin-right:2px;cursor:pointer} .mean .dyn{color:var(--ink)} .mean b{font-weight:650}
 #hero{cursor:pointer;text-align:left;font:inherit;color:inherit}
 #hero:active{transform:scale(.985)}
 .lev{background:var(--card);border-radius:var(--r);padding:13px 15px 8px;margin-top:18px}
@@ -194,6 +205,8 @@ input[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;border-radiu
 input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:20px}
 
 /* ---------- cartes ---------- */
+text.band{font-size:14px;font-weight:650;fill:var(--ink-3)}
+line.sep{stroke:var(--hair);stroke-width:1}
 .card{cursor:pointer}
 .card rect.bg{fill:var(--card)}
 .card.opt rect.bg{stroke:var(--hair);stroke-width:1;stroke-dasharray:4 3}
@@ -204,6 +217,9 @@ svg .ic{color:var(--ink-3)}
 .card text.v tspan.qu{font-size:10px;font-weight:500;fill:var(--ink-3)}
 .card.sel rect.bg{stroke:var(--accent);stroke-width:2}
 .card.dim{opacity:.26}
+.far .card text{display:none}
+.far text.band{font-size:26px;fill:var(--ink-2)}
+.far .card .lk{display:none}
 .card,.edge{transition:opacity .28s var(--ease)}
 .fld rect{fill:var(--fill)}
 .fld text{font-size:12.5px;font-weight:600;fill:var(--ink)}
@@ -212,9 +228,9 @@ svg .ic{color:var(--ink-3)}
 .stp text{fill:var(--ink-2);font-size:14px;font-weight:600;text-anchor:middle}
 .stp g{cursor:pointer}
 .stp g:active rect{fill:var(--hair)}
-.edge{fill:none;stroke:var(--ink-3);stroke-width:1.3;opacity:.34}
+.edge{fill:none;stroke:var(--ink-3);opacity:.34}
 .edge.fb{stroke-dasharray:5 4}
-.edge.hot{opacity:.95;stroke:var(--accent);stroke-width:2}
+.edge.hot{opacity:.95;stroke:var(--accent)}
 .edge.dim{opacity:.05}
 .pulse{fill:none;stroke-width:2.6;stroke-linecap:round;pointer-events:none}
 .card:focus-visible rect.bg{stroke:var(--accent);stroke-width:2.5}
@@ -237,7 +253,8 @@ svg .ic{color:var(--ink-3)}
     <button id="out-h" aria-expanded="true">Ce que ça coûte en 2100<span class="chev">⌃</span></button>
     <div id="out-list"></div>
     <p id="out-key">Chiffres <b class="w">rouges</b> : pire que la trajectoire actuelle · <b class="c">bleus</b> : mieux.
-      <span class="lk"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><use href="#ic-lock"/></svg> seuil franchi, sans retour possible.</span></p>
+      <span class="lk"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><use href="#ic-lock"/></svg> seuil franchi, sans retour possible.</span>
+      <button id="src-b">Sources et méthode ›</button></p>
   </div>
 </div>
 
@@ -576,7 +593,7 @@ const liveEdge=e=>!(!showOpt&&(e.B||byId[e.a].b||byId[e.b].b));
    PLATEAU
    ============================================================ */
 const CW=156,CH=92,VW=2740,VH=1100,BOT=1052;
-const X=n=>60+n.L*176, Y=n=>60+n.R*108;
+const X=n=>60+n.L*176, Y=n=>104+n.R*108;
 const NS="http://www.w3.org/2000/svg";
 const el=(t,a)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e;};
 const board=document.getElementById("board"), stage=document.getElementById("stage");
@@ -693,8 +710,23 @@ Object.keys(ICON).forEach(id=>{
   sym.innerHTML=ICON[id]; defs.appendChild(sym);
 });
 board.appendChild(defs);
-const gW=el("g",{id:"world"}),gE=el("g"),gP=el("g"),gN=el("g");
-gW.appendChild(gE); gW.appendChild(gP); gW.appendChild(gN); board.appendChild(gW);
+const gW=el("g",{id:"world"}),gB=el("g"),gE=el("g"),gP=el("g"),gN=el("g");
+gW.appendChild(gB); gW.appendChild(gE); gW.appendChild(gP); gW.appendChild(gN); board.appendChild(gW);
+
+/* six bandes, de ce qu'on fait à ce que ça nous coûte */
+const BANDES=[
+ {a:0,b:1,n:"Ce qu'on fait"},
+ {a:2,b:3,n:"Ce qu'on émet"},
+ {a:4,b:7,n:"Ce que devient l'atmosphère"},
+ {a:8,b:9,n:"Ce que fait le climat"},
+ {a:10,b:11,n:"Ce que ça déclenche"},
+ {a:12,b:14,n:"Ce que ça nous coûte"}
+];
+BANDES.forEach((z,i)=>{
+  const x0=60+z.a*176-14;
+  if(i) gB.appendChild(el("line",{class:"sep",x1:x0-14,y1:30,x2:x0-14,y2:1010}));
+  const t=el("text",{class:"band",x:x0+2,y:74}); t.textContent=z.n; gB.appendChild(t);
+});
 
 function wrap(t,max){const w=t.split(" "),o=[];let l="";
   for(const x of w){ if(!l)l=x; else if((l+" "+x).length<=max)l+=" "+x; else{o.push(l);l=x;} }
@@ -706,12 +738,13 @@ function path(s,t){
   if(Math.abs(X(s)-X(t))<300){const d=90+.12*Math.abs(Y(s)-Y(t));
     return `M${X(s)},${sy} C${X(s)-d},${sy} ${X(t)-d},${ty} ${X(t)},${ty}`;}
   const scx=X(s)+CW/2,tcx=X(t)+CW/2;
-  if(s.R<=3) return `M${scx},${Y(s)} C${scx},16 ${tcx},16 ${tcx},${Y(t)}`;
+  if(s.R<=3) return `M${scx},${Y(s)} C${scx},60 ${tcx},60 ${tcx},${Y(t)}`;
   return `M${scx},${Y(s)+CH} C${scx},${BOT} ${tcx},${BOT} ${tcx},${Y(t)+CH}`;
 }
 const edgeEls=[];
 EDGES.forEach(e=>{const s=byId[e.a],t=byId[e.b]; if(!s||!t)return;
-  const p=el("path",{d:path(s,t),class:"edge"+(e.fb?" fb":""),"marker-end":"url(#ar)"});
+  const p=el("path",{d:path(s,t),class:"edge"+(e.fb?" fb":""),"marker-end":"url(#ar)",
+    "stroke-width":(.8+1.7*(e.w||1)).toFixed(2)});
   if(e.neg)p.setAttribute("stroke-dasharray","1.5 3.5");
   gE.appendChild(p); edgeEls.push({e,p});});
 
@@ -827,7 +860,8 @@ function apply(fromId,keepSheet){
     })();
   }
   if(fromId!=null&&!RM)pulse(fromId,dir);
-  if(mode==="locks") buildLockSheet();
+  if(mode==="sources"){}
+  else if(mode==="locks") buildLockSheet();
   else if(sel!=null){ keepSheet?refreshSheet():buildSheet(); }
 }
 function pulse(from,dir){
@@ -877,7 +911,7 @@ function draw(s){
       c.v.style.fill=tone(n.id,d)||"var(--ink-3)";
     }
     c.tint.setAttribute("fill",tone(n.id,d)||"var(--cool)");
-    c.tint.setAttribute("opacity",Math.min(.13,Math.abs(d)*.30));
+    c.tint.setAttribute("opacity",Math.min(far?.34:.13,Math.abs(d)*(far?.8:.30)));
     c.lk.style.display=LOCKED.has(n.id)?"":"none";
     c.g.classList.toggle("locked",LOCKED.has(n.id));
     c.g.classList.toggle("sel",n.id===sel);
@@ -999,7 +1033,8 @@ const DYN={
  15:s=>`${fr(s.p.forc)} W/m² : multiplié par la surface du globe, c'est ${Math.round(s.p.forc*5.1e14/1e12)} térawatts injectés en permanence — mille fois la puissance électrique mondiale.`,
  17:s=>`≈ +${fr(s.p.dT*.8)} °C en surface, pour +${fr(s.p.dT)} °C de moyenne mondiale : l'océan encaisse plus d'énergie mais se réchauffe plus lentement que les terres — et il ne redescendra pas avant des siècles.`,
  21:s=>{const r=retour(s.p.dT);
-   return `Sur les terres françaises, cela fait ≈ +${fr(s.p.dT*1.4)} °C, et ≈ +${fr(s.p.dT*2.5)} °C en Arctique.<br><br>`+
+   return `Sur les terres françaises, cela fait ≈ +${fr(s.p.dT*1.4)} °C, et ≈ +${fr(s.p.dT*2.5)} °C en Arctique.`+
+   blocVille(s.p.dT)+
    `Un été aussi chaud que le plus chaud de 1900 revenait alors une année sur 44. Dans ce scénario : `+
    `<b>${r<1.3?"presque chaque année":"environ une année sur "+Math.round(r)}</b>.`+courbe(s.p.dT)+
    `<span style="font-size:12px;opacity:.75">Le dernier âge glaciaire était ≈ 5 °C sous l'époque préindustrielle, avec trois kilomètres de glace sur le Canada. Nous parcourons l'écart inverse plus de vingt fois plus vite.</span>`;},
@@ -1010,6 +1045,28 @@ const DYN={
    return `Un été de type 2003 revient ici <b>${r<1.3?"presque chaque année":"environ une année sur "+Math.round(r)}</b>. Ce qui était exceptionnel devient la normale — et le nouvel exceptionnel se situe bien plus haut.`;},
  41:s=>`≈ ${fr(s.p.perma*1.6)} Gt de CO₂e s'échappent chaque année des sols dégelés : l'équivalent de ${Math.round(s.p.perma*1.6/.4)} fois les émissions annuelles de la France, sans qu'aucun humain n'y soit pour quelque chose.`
 };
+/* ---- ville analogue : le réchauffement local ajouté à la moyenne de la ville ---- */
+let MAVILLE="Paris";
+const VILLES_FR=[["Lille",11.0],["Paris",11.9],["Strasbourg",11.3],["Rennes",12.2],
+  ["Nantes",12.6],["Lyon",12.7],["Bordeaux",13.8],["Toulouse",14.1],["Marseille",15.5]];
+const ANALOGUES=[["Lille",11.0],["Paris",11.9],["Lyon",12.7],["Bordeaux",13.8],["Toulouse",14.1],
+  ["Montpellier",15.3],["Madrid",15.0],["Rome",16.0],["Barcelone",16.5],["Lisbonne",17.5],
+  ["Alger",18.3],["Tunis",19.2],["Séville",19.2],["Marrakech",19.9],["Le Caire",22.0]];
+function analogue(dT){
+  const v=VILLES_FR.find(x=>x[0]===MAVILLE)||VILLES_FR[1], cible=v[1]+dT*1.4;
+  let best=ANALOGUES[0], d=1e9;
+  for(const a of ANALOGUES){ if(a[0]===v[0]) continue;
+    const dd=Math.abs(a[1]-cible); if(dd<d){d=dd;best=a;} }
+  return {ville:v[0],t:v[1],cible,best:best[0]};
+}
+function blocVille(dT){
+  const a=analogue(dT);
+  return `<div class="ville"><select id="ville" aria-label="Choisir une ville">`+
+    VILLES_FR.map(v=>`<option${v[0]===a.ville?" selected":""}>${v[0]}</option>`).join("")+
+    `</select> passerait d'une moyenne annuelle de ${fr(a.t)} °C à <b>${fr(a.cible)} °C</b> : le climat qu'a <b>${a.best}</b> aujourd'hui.`+
+    `<em>Une moyenne annuelle ne fait pas un climat — pluies, saisons et extrêmes diffèrent. Ordre de grandeur obtenu en ajoutant le réchauffement local (≈ 1,4 fois la moyenne mondiale) à la moyenne actuelle de la ville.</em></div>`;
+}
+
 /* ---- les sorties sensibles, celles qu'on regarde en premier ---- */
 const interp=(x,pts)=>{
   if(x<=pts[0][0])return pts[0][1];
@@ -1133,6 +1190,7 @@ function buildSheet(){
   refreshSheet();
 }
 function refreshSheet(){
+  if(mode==="sources") return;
   if(mode==="locks"){ if(last) buildLockSheet(); return; }
   if(sel==null||!last)return;
   const n=byId[sel], s=last, d=s.idx[sel]-1, A=ADJ[sel];
@@ -1142,7 +1200,9 @@ function refreshSheet(){
   SR.n.style.color=a||!A?col:"var(--ink)";
   SR.c.textContent=n.m+" · "+(Math.abs(d)<.005?"au niveau de la trajectoire actuelle":sgn(Math.round(d*100))+" % vs trajectoire actuelle");
   if(SR.sl){SR.sl.value=levVal(sel);SR.slv.textContent=levTxt(sel);}
-  if(SR.mean)SR.mean.innerHTML=meaning(sel,s);
+  if(SR.mean){SR.mean.innerHTML=meaning(sel,s);
+    const v=SR.mean.querySelector("#ville");
+    if(v) v.onchange=e=>{MAVILLE=e.target.value; refreshSheet();};}
   SR.rows.forEach(r=>{const dv=s.idx[r.id]-1, u=byId[r.id].u;
     const txt=Math.abs(dv)<.005?"":sgn(Math.round(dv*100))+" %";
     r.el.innerHTML=(u&&txt?`<i>${u}</i> `:"")+txt;
@@ -1167,6 +1227,47 @@ function buildLockSheet(){
     <div class="grp" style="padding:2px 0">${rows}</div>
     <p class="note">Seuils : valeur centrale de l'évaluation d'Armstrong McKay <em>et al.</em> (Science, 2022). Les fourchettes sont larges — de 0,8 à 3 °C pour le Groenland, de 1,4 à 8 °C pour l'AMOC. On sait que ces portes existent, pas exactement où sont les poignées.</p>`;
   $("sh-x").onclick=close;
+}
+const SOURCES=[
+ {t:"Le noyau physique",l:[
+  ["Réchauffement par tonne émise","0,45 °C pour 1000 GtCO₂ · GIEC AR6, fourchette 0,27 à 0,63"],
+  ["Forçage du CO₂","5,35·ln(C/C₀) · Myhre et al., 1998"],
+  ["Émissions actuelles","37 GtCO₂ fossiles + 4,2 usage des sols · Global Carbon Budget 2024"],
+  ["Autres gaz à effet de serre","≈ 12 GtCO₂e/an · GIEC AR6 (59 GtCO₂e tous gaz confondus en 2019)"],
+  ["Part qui reste dans l'air","≈ 45 % des émissions · Global Carbon Budget"],
+  ["Masquage par les aérosols","≈ 0,4 °C de refroidissement · GIEC AR6"],
+  ["Niveau marin et pH","interpolés entre SSP1-1.9 et SSP5-8.5 · GIEC AR6"],
+  ["Budget 1,5 °C","≈ 275 GtCO₂ depuis 2025 · GIEC AR6 actualisé"]]},
+ {t:"Les seuils de bascule",l:[
+  ["Les six seuils","Armstrong McKay et al., Science, 2022 — valeurs centrales. Les fourchettes sont larges : 0,8 à 3 °C pour le Groenland, 1,4 à 8 °C pour l'AMOC."]]},
+ {t:"Les conséquences chiffrées",l:[
+  ["Espèces menacées d'extinction","9 % à 1,5 °C, 14 % à 2 °C, 29 % à 4 °C · GIEC AR6, groupe II"],
+  ["Population sous la ligne d'eau","Kulp & Strauss, Nature Communications, 2019 (CoastalDEM)"],
+  ["Zone climatique habitable","Xu et al., PNAS, 2020"],
+  ["Rendements céréaliers","≈ −6 %/°C sur le blé, −7 % sur le maïs · Zhao et al., PNAS, 2017"],
+  ["Récifs coralliens","70 à 90 % perdus à 1,5 °C, plus de 99 % à 2 °C · GIEC SR1.5"],
+  ["Déplacements de populations","216 millions d'ici 2050 · Banque mondiale, Groundswell, 2021"],
+  ["Pollution de l'air","≈ 4 millions de morts prématurées par an · OMS"],
+  ["Ville analogue","méthode maison : moyenne annuelle de la ville + réchauffement local. Inspirée de Bastin et al., PLOS One, 2019"]]},
+ {t:"Ce qui n'est pas sourcé",l:[
+  ["Le poids des flèches","de 0,3 à 1 — des jugements d'auteur sur l'importance relative de chaque cause, pas des coefficients mesurés."],
+  ["Les exposants de non-linéarité","2,2 pour les canicules, 2,0 pour les incendies… Ils traduisent un fait réel (les extrêmes réagissent plus que la moyenne) sous une forme choisie."],
+  ["Les rétroactions","permafrost, incendies, Amazonie : des paramétrisations d'ordre de grandeur, calées pour que la contribution actuelle soit crédible."],
+  ["Les multiplicateurs des verrous","ils traduisent « cet élément reste durablement aggravé », pas une amplitude mesurée."],
+  ["La répartition sectorielle","16 / 7 / 10 / 4 GtCO₂ par usage final : un partage cohérent avec les inventaires, mais un partage."]]}
+];
+function buildSourcesSheet(){
+  body.innerHTML=`
+    <div class="kick">Méthode<button class="close" id="sh-x" aria-label="Fermer">✕</button></div>
+    <h2>D'où viennent ces chiffres</h2>
+    <p class="desc">Ce simulateur est un outil pédagogique, pas un modèle climatique. Les grandeurs physiques sont des ordres de grandeur défendables ; les pourcentages sur les cartes de conséquences sont ordinaux — ils classent correctement les réactions les unes par rapport aux autres, ils ne se lisent pas comme des mesures.</p>`+
+    SOURCES.map(g=>`<div class="srcgrp"><h4>${g.t}</h4><ul>`+
+      g.l.map(([a,b])=>`<li><b>${a}</b><em>${b}</em></li>`).join("")+`</ul></div>`).join("");
+  $("sh-x").onclick=close;
+}
+function openSources(){
+  mode="sources"; sel=null; hover=null; refreshChain(); draw(cur); applyDim(); buildSourcesSheet();
+  sheetEl.classList.add("on"); $("tools").classList.add("shift"); SC.classList.add("shift");
 }
 function openLocks(){
   mode="locks"; sel=null; hover=null; refreshChain(); draw(cur); applyDim(); buildLockSheet();
@@ -1221,10 +1322,19 @@ $("t-fit").onclick=()=>{const on=$("t-fit").getAttribute("aria-pressed")==="true
    NAVIGATION
    ============================================================ */
 let k=1,tx=0,ty=0;
-const T=()=>gW.setAttribute("transform",`translate(${tx},${ty}) scale(${k})`);
+let far=false;
+function setFar(){
+  board.classList.toggle("far",far);
+  NODES.forEach(n=>{const u=C[n.id].g.querySelector("use.ic"); if(!u)return;
+    const v=far?[55,23,46]:[12,60,23];
+    u.setAttribute("x",v[0]);u.setAttribute("y",v[1]);u.setAttribute("width",v[2]);u.setAttribute("height",v[2]);});
+  if(cur)draw(cur);
+}
+const T=()=>{gW.setAttribute("transform",`translate(${tx},${ty}) scale(${k})`);
+  const nf=k<.55; if(nf!==far){far=nf;setFar();}};
 const box=()=>{const r=stage.getBoundingClientRect();
   board.setAttribute("viewBox",`0 0 ${r.width} ${r.height}`);return r;};
-function home(){const r=box();k=clamp((r.height-24)/900,.5,1.05);
+function home(){const r=box();k=clamp((r.height-24)/980,.5,1.05);
   const hero=$("hero").getBoundingClientRect();
   tx=r.width>860?hero.width+26:-20*k;      /* le plateau démarre à droite du bandeau */
   ty=-14*k;T(); if(sel!=null)ensureVisible(sel);}
@@ -1280,6 +1390,7 @@ $("out-h").onclick=()=>{const h=$("hero"),c=h.classList.toggle("closed");
   $("out-h").setAttribute("aria-expanded",c?"false":"true");};
 if(innerWidth<=860) $("hero").classList.add("closed");
 $("h-l").onclick=openLocks;
+$("src-b").onclick=ev=>{ev.stopPropagation();openSources();};
 markScen(0); apply(null); applyDim(); home();
 setTimeout(()=>{const h=$("hint");if(h)h.style.opacity=0;},7000);
 </script>
