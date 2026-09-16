@@ -28,10 +28,15 @@ lesquelles on agit, et le repère reste visible même dézoomé.
 
 ## Sur téléphone
 
-Sous 640 px, la mise en page change : le chiffre principal passe en barre pleine largeur
+Sous 860 px, la mise en page change : le chiffre principal passe en barre pleine largeur
 avec la température à gauche et le scénario à droite, les sept conséquences deviennent des
 **pastilles qui défilent horizontalement** au lieu d'une pile de sept lignes, et les outils
 s'alignent sur une rangée au-dessus des scénarios. Le plateau récupère tout le centre.
+
+Le bandeau est **borné en hauteur** — `max-height:min(44vh,320px)`, le reste défile à
+l'intérieur. C'est une garantie, pas un réglage : quelles que soient l'orientation et la
+taille de l'écran, il ne peut pas manger la page. En paysage sur téléphone, 44 vh de 390 px
+font 172 px.
 
 Le cadrage d'arrivée diffère aussi : faire tenir les 52 cartes sur 390 px les ferait passer
 en silhouettes, donc on arrive **lisible au début de la chaîne**, sous le bandeau. Le bouton

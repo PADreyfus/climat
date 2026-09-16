@@ -189,8 +189,11 @@ svg#board{display:block;width:100%;height:100%}
    pastilles qui défilent horizontalement ; les outils s'alignent sur une rangée.
    Le plateau récupère tout le centre de l'écran.
    ============================================================ */
-@media (max-width:640px){
-  #hero{left:8px;right:8px;width:auto;max-width:none;padding:9px 12px 10px;border-radius:16px}
+@media (max-width:860px){
+  #hero{left:8px;right:8px;width:auto;max-width:none;padding:9px 12px 10px;border-radius:16px;
+    /* garde-fou : quoi qu'il arrive, le bandeau ne mange jamais l'écran.
+       En paysage, 44vh de 390 px fait 172 px ; le reste défile à l'intérieur. */
+    max-height:min(44vh,320px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 
   /* température à gauche, scénario à droite, budget en dessous */
   #h-main{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:11px;align-items:center}
@@ -215,7 +218,8 @@ svg#board{display:block;width:100%;height:100%}
   .orow span em{display:none}          /* les sous-titres ne tiennent pas dans une pastille */
 
   #out-key{margin-top:9px;padding-top:8px;font-size:11px;line-height:1.45}
-  #out-key .okey2,#out-key .lk{display:none}   /* le code couleur reste dans la fiche Méthode */
+  #out-key .okey1,#out-key .okey2,#out-key .lk{display:none}  /* tout est dans la fiche Méthode */
+  #out-key{margin-top:8px;padding-top:7px}
 
   /* outils sur une rangée, au-dessus des scénarios */
   #tools{flex-direction:row;right:8px;bottom:calc(60px + env(safe-area-inset-bottom,0px));gap:7px}
@@ -322,7 +326,7 @@ svg .ic{color:var(--ink-3)}
   <div id="h-out">
     <button id="out-h" aria-expanded="true">Ce que ça coûte en 2100<span class="chev">⌃</span></button>
     <div id="out-list"></div>
-    <p id="out-key">Tous les % du plateau se comptent <b>depuis une trajectoire tenue (+1,7 °C)</b> : à « Actuel », ils disent ce que la trajectoire actuelle coûte déjà. <span class="okey2"><b class="w">Rouges</b> : pire qu'au chargement · <b class="c">bleus</b> : mieux.</span>
+    <p id="out-key"><span class="okey1">Tous les % du plateau se comptent <b>depuis une trajectoire tenue (+1,7 °C)</b> : à « Actuel », ils disent ce que la trajectoire actuelle coûte déjà.</span> <span class="okey2"><b class="w">Rouges</b> : pire qu'au chargement · <b class="c">bleus</b> : mieux.</span>
       <span class="lk"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><use href="#ic-lock"/></svg> seuil de bascule franchi à cette température.</span>
       <button id="src-b">Sources et méthode ›</button></p>
   </div>
@@ -344,7 +348,7 @@ svg .ic{color:var(--ink-3)}
   <div class="t-body"><h3 id="t-h"></h3><p id="t-p"></p></div>
   <div class="t-act"><button id="t-skip">Passer</button><button id="t-next" class="prim">Suivant</button></div>
 </div>
-<div id="ver">v1.3.0</div>
+<div id="ver">v1.3.1</div>
 <div id="hint">Glissez pour vous déplacer · molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
 
 <aside id="sheet" aria-live="polite">
@@ -1515,15 +1519,19 @@ const box=()=>{const r=stage.getBoundingClientRect();
   board.setAttribute("viewBox",`0 0 ${r.width} ${r.height}`);return r;};
 function home(){const r=box();
   const hero=$("hero").getBoundingClientRect();
-  const phone=r.width<=640, wide=r.width>860;
-  if(phone){
+  const wide=r.width>860;      /* même palier que la mise en page : le bandeau est
+                                  pleine largeur dès 860 px, le plateau passe dessous */
+  if(!wide){
     /* Tout faire tenir sur 390 px rendrait les 52 cartes illisibles — sous 0,55 elles
        passent en silhouettes. On arrive donc lisible au début de la chaîne, sous le
        bandeau ; ⤢ reste là pour la vue d'ensemble. */
-    k=.62; tx=10; ty=hero.height+16;
+    k=.62; tx=10;
+    /* le bandeau est borné par CSS, donc sa hauteur mesurée est déjà plafonnée ;
+       on garde une marge pour que le plateau ne soit jamais réduit à rien */
+    ty=Math.min(hero.height+16,r.height*.46);
   }else{
     k=clamp((r.height-24)/980,.55,1.05);
-    tx=wide?hero.width+26:-20*k;           /* le plateau démarre à droite du bandeau */
+    tx=hero.width+26;                      /* le plateau démarre à droite du bandeau */
     ty=-14*k;
   }
   T(); if(sel!=null)ensureVisible(sel);}
