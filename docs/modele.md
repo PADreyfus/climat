@@ -114,20 +114,23 @@ affiché est bien dû au curseur et non au modèle.
 
 ---
 
-## 3. Les verrous (édition épurée)
+## 3. Les seuils de bascule
 
-Le modèle décrit plus haut est **sans mémoire** : il calcule un équilibre à partir de la
-position des curseurs, donc reculer un curseur ramène exactement à l'état d'avant. Les
-points de bascule contredisent précisément cela — d'où une couche de mémoire.
+Le modèle est **sans mémoire** : il calcule un équilibre à partir de la position des
+curseurs, et reculer un curseur ramène exactement à l'état d'avant. Les seuils de bascule
+ne font pas exception — ils décrivent le réglage affiché, et se rouvrent quand on
+redescend.
 
-L'application retient le **ΔT le plus haut atteint dans la session**. Quand ce pic
-franchit un seuil, l'élément se verrouille, et il ne se déverrouille plus.
+Franchir un seuil impose des planchers qui réchauffent un peu plus, ce qui peut en
+franchir d'autres : l'ensemble est donc résolu **par point fixe**. On part sans plancher,
+donc au ΔT le plus bas, et un plancher ne peut qu'ajouter des seuils — la suite est
+monotone et converge en au plus six passes. Le résultat ne dépend pas du chemin parcouru.
 
-| Verrou | Seuil | Effet persistant dans le modèle |
+| Seuil | Température | Effet dans le modèle tant qu'il est franchi |
 |---|---|---|
-| Récifs coralliens | 1,5 °C | × 1,5 sur la biodiversité marine, en permanence |
+| Récifs coralliens | 1,5 °C | × 1,5 sur la biodiversité marine |
 | Calottes polaires | 1,5 °C | × 1,25 — l'essentiel de l'engagement est post-2100 |
-| Permafrost | 1,5 °C | plancher de 0,9 GtCO₂e/an, quelle que soit la température ensuite |
+| Permafrost | 1,5 °C | plancher de 0,9 GtCO₂e/an sur le dégel |
 | Glaciers de montagne | 2,0 °C | × 1,3 |
 | Forêt amazonienne | 3,5 °C | plancher de 0,6 GtCO₂/an |
 | Circulation atlantique | 4,0 °C | × 1,6 |
@@ -137,13 +140,18 @@ sont larges** — 0,8 à 3 °C pour le Groenland, 1,4 à 8 °C pour l'AMOC. Les 
 sont des choix d'auteur : ils traduisent « cet élément reste durablement aggravé », pas
 une amplitude mesurée.
 
-La mémoire ne court que sur vos propres réglages : poussez un curseur au maximum puis
-ramenez-le, les seuils franchis au passage restent fermés — ce qui a été cassé ne se
-répare pas. Charger un scénario, en revanche, charge un monde neuf et remet la mémoire à
-zéro : chaque scénario affiche les seuils qu'il franchit lui-même, ni plus ni moins.
+### Ce que cela écarte volontairement
 
-Le bouton ↺ remet les curseurs au plus bas **et efface la mémoire**, pour rejouer depuis
-un climat où aucun seuil n'est franchi.
+Un point de bascule est, dans le monde réel, **irréversible** : une calotte engagée ou un
+permafrost en dégel ne se referment pas parce que les émissions baissent ensuite. Le
+modèle ne le simule pas. Le cadenas sert à montrer où sont ces portes et ce qu'il y a
+derrière ; il ne prétend pas retenir qu'on les a franchies.
+
+C'est un choix assumé, au prix d'une infidélité connue : il garde le geste lisible — un
+réglage, un résultat, toujours le même — là où une mémoire de session rendait deux
+sessions identiques incomparables.
+
+Le bouton ↺ remet simplement les curseurs au plus bas.
 
 ### Un piège évité
 

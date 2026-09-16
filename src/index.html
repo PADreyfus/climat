@@ -262,7 +262,7 @@ svg .ic{color:var(--ink-3)}
     <button id="out-h" aria-expanded="true">Ce que ça coûte en 2100<span class="chev">⌃</span></button>
     <div id="out-list"></div>
     <p id="out-key">Chiffres <b class="w">rouges</b> : pire que la trajectoire actuelle · <b class="c">bleus</b> : mieux.
-      <span class="lk"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><use href="#ic-lock"/></svg> seuil franchi, sans retour possible.</span>
+      <span class="lk"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><use href="#ic-lock"/></svg> seuil de bascule franchi à cette température.</span>
       <button id="src-b">Sources et méthode ›</button></p>
   </div>
 </div>
@@ -563,20 +563,34 @@ const levSet=(id,v)=>{const a=ADJ[id],l=LEV[a.k];
 const levTxt=id=>ADJ[id].k==="ccs"?fr(S.ccs,1)+" Gt/an":Math.round(levVal(id))+" %";
 const levStep=id=>ADJ[id].k==="ccs"?1:10;
 
-let PEAK=0;                                   /* ΔT le plus haut atteint dans la session */
-const lockState=()=>LOCKS.filter(l=>PEAK>=l.t);
-function lockFloors(){
-  const L={}; for(const l of lockState()){
+/* Les seuils décrivent l'état courant, pas l'histoire de la session : ils se ferment
+   en montant et se rouvrent en redescendant. Chaque réglage rejoue donc une simulation
+   neuve.
+   Franchir un seuil impose des planchers (permafrost, Amazonie) qui réchauffent un peu
+   plus, ce qui peut en franchir d'autres : on itère jusqu'au point fixe. La suite est
+   monotone — on part sans plancher, donc au ΔT le plus bas, et un plancher ne peut
+   qu'ajouter des seuils — elle converge en au plus LOCKS.length passes. */
+const floorsOf=set=>{
+  const L={}; for(const l of set){
     if(l.perma)L.perma=Math.max(L.perma||0,l.perma);
     if(l.amaz) L.amaz =Math.max(L.amaz||0,l.amaz);
     if(l.slr)  L.slr  =(L.slr||0)+l.slr;
   } return L;
+};
+function settle(){
+  let set=[],L={};
+  for(let i=0;i<=LOCKS.length;i++){
+    const next=LOCKS.filter(l=>physics(S,L).dT>=l.t);
+    if(next.length===set.length) break;
+    set=next; L=floorsOf(set);
+  }
+  return {set,L};
 }
 function compute(){
-  const L=lockFloors();
+  const {set:LOCKSET,L}=settle();
   const p=physics(S,L), idx={};
   p.fbWarm=Math.max(0,p.dT-physics(S,L,true).dT);   /* ce que les boucles ajoutent toutes seules */
-  p.locked=lockState();
+  p.locked=LOCKSET;
   const mult={}; for(const l of p.locked) if(l.idx) mult[l.id]=l.idx;
   NODES.forEach(n=>idx[n.id]=1);
   const fixed={};
@@ -619,7 +633,7 @@ const mkh=el("marker",{id:"arh",viewBox:"0 0 10 10",refX:"9",refY:"5",markerWidt
 mkh.appendChild(el("path",{d:"M0,1.5 L10,5 L0,8.5 z",fill:"var(--accent)"})); defs.appendChild(mkh);
 
 /* ============================================================
-   VERROUS — ce qui ne se rouvre pas une fois franchi
+   SEUILS DE BASCULE — franchis ou non par le réglage courant
    Seuils : Armstrong McKay et al., Science 2022 (valeur centrale)
    ============================================================ */
 const LOCKS=[
@@ -809,10 +823,7 @@ const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
 const $=id=>document.getElementById(id);
 let cur=null,last=null,anim=0,chain=null,pulseTok=0;
 function snap(){
-  let r=compute();
-  const n0=r.p.locked.length;
-  PEAK=Math.max(PEAK,r.p.dT);
-  if(lockState().length!==n0) r=compute();       /* un verrou qui se ferme agit tout de suite */
+  const r=compute();
   return {p:{...r.p,locked:r.p.locked},idx:{...r.idx}};
 }
 function lerp(a,b,t){const o={p:{},idx:{}};
@@ -848,12 +859,12 @@ function applyDim(){
     p.classList.toggle("dim",!!chain&&!hot&&!chain.edge(e));
   });
 }
-const LOCKED=new Set();
+let LOCKED=new Set();     /* seuils franchis ICI — se vide quand on redescend */
 let boot=true;
 function announce(l){
   const t=$("toast");
   t.innerHTML=`<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><use href="#ic-lock"/></svg>`+
-    `<span><b>Verrou franchi — ${l.n}</b><em>${l.q}</em></span>`;
+    `<span><b>Seuil franchi — ${l.n}</b><em>${l.q}</em></span>`;
   t.classList.add("on"); clearTimeout(announce.tm);
   announce.tm=setTimeout(()=>t.classList.remove("on"),9000);
   const c=C[l.id]; if(c&&!RM){c.g.classList.remove("flash");void c.g.offsetWidth;c.g.classList.add("flash");}
@@ -862,7 +873,8 @@ function apply(fromId,keepSheet){
   const to=snap(), dir=cur?Math.sign(to.p.dT-cur.p.dT):0;
   last=to;
   let fresh=null;
-  for(const l of to.p.locked) if(!LOCKED.has(l.id)){LOCKED.add(l.id); fresh=l;}
+  for(const l of to.p.locked) if(!LOCKED.has(l.id)) fresh=l;   /* franchi à l'instant */
+  LOCKED=new Set(to.p.locked.map(l=>l.id));
   if(fresh&&!boot) announce(fresh);
   boot=false;
   if(!cur||RM){cur=to;draw(cur);}
@@ -944,7 +956,7 @@ function draw(s){
     `Budget 1,5 °C épuisé dans <b>${Math.round(p.budget)} ans</b>`;
   const nl=p.locked.length;
   $("h-l").innerHTML=nl?`<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="#ic-lock"/></svg>`+
-    `<span><b>${nl} seuil${nl>1?"s":""}</b> franchi${nl>1?"s":""} sans retour</span>`
+    `<span><b>${nl} seuil${nl>1?"s":""}</b> de bascule franchi${nl>1?"s":""}</span>`
     :`<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="#ic-lock"/></svg><span>Aucun seuil franchi ici</span>`;
   $("h-l").classList.toggle("on",nl>0);
   drawOut(s);
@@ -1227,7 +1239,7 @@ function refreshSheet(){
 let mode="card";
 function buildLockSheet(){
   const p=last.p, rows=LOCKS.map(l=>{
-    const on=PEAK>=l.t;
+    const on=p.locked.some(x=>x.id===l.id);
     return `<div class="lockrow${on?" hot":""}"><span class="s">+${fr(l.t,1)} °C</span>
       <span class="t">${l.n}<em>${l.q}</em></span>
       <span class="st">${on?'<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true"><use href="#ic-lock"/></svg>':"—"}</span></div>`;
@@ -1235,11 +1247,11 @@ function buildLockSheet(){
   body.innerHTML=`
     <div class="kick"><svg class="ic" viewBox="0 0 24 24" width="25" height="25" aria-hidden="true"><use href="#ic-lock"/></svg>Seuils
       <button class="close" id="sh-x" aria-label="Fermer">✕</button></div>
-    <h2>Ce qui ne se rouvre pas</h2>
+    <h2>Les seuils de bascule</h2>
     <div class="val"><div class="n">${p.locked.length}</div>
-      <div class="c">seuils franchis par ce scénario · pic atteint +${fr(PEAK)} °C</div></div>
-    <p class="desc">${p.fbWarm>.015?`Les boucles qui se sont enclenchées ajoutent à elles seules <b>+${fr(p.fbWarm,2)} °C</b> que plus personne ne pilote.<br><br>`:""}Un seuil franchi ne se rouvre pas en redescendant : la boucle qui s'est enclenchée n'a plus besoin de nous pour continuer. C'est la mémoire de cette simulation — elle retient le point le plus chaud atteint, pas celui où vous êtes maintenant.</p>
-    <p class="note" style="margin:10px 0 0">Cette mémoire se garde tant que vous réglez les cartes à la main. Elle repart de zéro quand vous chargez un autre scénario, ou avec le bouton ↺.</p>
+      <div class="c">seuils franchis à +${fr(p.dT)} °C, le réglage actuel</div></div>
+    <p class="desc">${p.fbWarm>.015?`Les boucles qui se sont enclenchées ajoutent à elles seules <b>+${fr(p.fbWarm,2)} °C</b> que plus personne ne pilote.<br><br>`:""}Au-delà d'un seuil de bascule, une boucle s'entretient seule : le dégel libère du carbone, qui réchauffe, qui dégèle davantage. Le cadenas marque les seuils que franchit le réglage affiché, et rien d'autre.</p>
+    <p class="note" style="margin:10px 0 0">Redescendez, et les cadenas se rouvrent : chaque réglage rejoue une simulation neuve, sans mémoire de ce qui a été essayé avant. Le climat réel, lui, ne se rejoue pas — une calotte engagée ou un permafrost en dégel ne se referment pas. C'est la limite de l'exercice, et la raison d'être de ces cadenas.</p>
     <div class="grp" style="padding:2px 0">${rows}</div>
     <p class="note">Seuils : valeur centrale de l'évaluation d'Armstrong McKay <em>et al.</em> (Science, 2022). Les fourchettes sont larges — de 0,8 à 3 °C pour le Groenland, de 1,4 à 8 °C pour l'AMOC. On sait que ces portes existent, pas exactement où sont les poignées.</p>`;
   $("sh-x").onclick=close;
@@ -1304,7 +1316,7 @@ PRESETS.forEach((p,i)=>{const b=document.createElement("button");
   b.setAttribute("aria-pressed",i===0?"true":"false");
   b.onclick=()=>{
     LEVERS.forEach(l=>S[l.k]=p.s[l.k]??l.def);
-    PEAK=0; LOCKED.clear(); boot=true;      /* changer de scénario, c'est charger un autre monde */
+    boot=true;                              /* changer de scénario : on ne commente pas les seuils du nouveau monde */
     markScen(i); apply(1);
   };
   SC.appendChild(b);});
@@ -1325,9 +1337,9 @@ $("t-opt").onclick=()=>{showOpt=!showOpt;
   refreshChain(); apply(null,true); applyDim();};
 $("t-reset").onclick=()=>{
   LEVERS.forEach(l=>S[l.k]=0); S.low=90; S.sink=130; S.ccs=1;
-  PEAK=0; LOCKED.clear(); markScen(); boot=true; apply(1);
+  markScen(); boot=true; apply(1);
   const t=$("toast");
-  t.innerHTML=`<span><b>Climat intact</b><em>Aucun seuil n'est encore franchi. Remontez les curseurs et regardez les verrous se fermer — ils ne se rouvriront plus.</em></span>`;
+  t.innerHTML=`<span><b>Climat intact</b><em>Aucun seuil n'est franchi. Montez les curseurs et regardez les cadenas se fermer un à un.</em></span>`;
   t.classList.add("on"); clearTimeout(announce.tm);
   announce.tm=setTimeout(()=>t.classList.remove("on"),9000);
 };
@@ -1441,18 +1453,18 @@ const setL=o=>{Object.assign(S,o);markScen();};
 const TOUR=[
  {h:"Voici la trajectoire actuelle",
   p:"Si le monde prolonge ses politiques en place jusqu'en 2100, le thermomètre monte de +2,8 °C. Tout ce que vous voyez à gauche en découle : les espèces, la mer, les récoltes, les conflits. Et quatre seuils de bascule sont déjà franchis sur cette trajectoire.",
-  run:()=>{LEVERS.forEach(l=>S[l.k]=l.def);PEAK=0;LOCKED.clear();boot=true;markScen(0);apply(1);}},
+  run:()=>{LEVERS.forEach(l=>S[l.k]=l.def);boot=true;markScen(0);apply(1);}},
  {h:"Les causes se règlent sur les cartes",
   p:"Les cartes de gauche sont ce que nous faisons. Huit d'entre elles portent un réglage, signalé par un trait bleu dans le coin. Sur celle-ci : − et + sur la carte, ou le curseur dans la fiche. Montons le transport mondial de moitié.",
   run:()=>{select(4);}},
  {h:"L'onde traverse tout le graphe",
   p:"Chaque carte touchée recalcule la suivante, jusqu'aux famines et aux conflits armés. Le transport seul pèse un quart des émissions : +50 % ne déplace le thermomètre que de 0,1 °C.",
   run:()=>{setL({tra:150});apply(4,true);}},
- {h:"Certains seuils ne se rouvrent pas",
-  p:"Poussons tout le monde fossile. À +3,6 °C, cinq seuils de bascule sont franchis — récifs, calottes, permafrost, glaciers, Amazonie. Un cadenas apparaît sur chaque carte concernée.",
+ {h:"Des seuils de bascule se franchissent",
+  p:"Poussons tout le monde fossile. À +3,6 °C, cinq seuils sont franchis — récifs, calottes, permafrost, glaciers, Amazonie. Un cadenas apparaît sur chaque carte concernée : au-delà de ce point, une boucle s'entretient toute seule.",
   run:()=>{close();setL({ind:150,bat:140,tra:160,agr:125,def:135,low:8,sink:85,ccs:0});apply(1);}},
- {h:"Et pourtant, on ne revient pas en arrière",
-  p:"Revenons à un monde sobre, à la main. La température redescend à +1,5 °C et les canicules s'effondrent — mais les cinq cadenas restent fermés. Sur la fonte des glaciers, la moitié du bénéfice est perdue : −18 % au lieu de −37 % si l'on n'était jamais monté si haut. C'est ce que veut dire « irréversible ».",
+ {h:"Chaque réglage rejoue le monde",
+  p:"Revenons à un monde sobre. La température retombe à +1,5 °C, les canicules s'effondrent, et les cadenas se rouvrent : la simulation ne garde aucune mémoire de ce qui a été essayé avant. Le climat réel, lui, ne se rejoue pas — c'est ce que ces seuils servent à montrer.",
   run:()=>{setL({ind:40,bat:30,tra:30,agr:65,def:10,low:85,sink:130,ccs:5});apply(1);}}
 ];
 

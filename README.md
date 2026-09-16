@@ -85,17 +85,21 @@ Chaque ligne ouvre la carte correspondante.
 Ces chiffres sont des ordres de grandeur issus d'un modèle simplifié — ils servent à
 faire sentir des proportions, pas à être cités.
 
-### Les verrous
+### Les seuils de bascule
 
-Le simulateur retient le **réchauffement le plus haut atteint** pendant la session.
-Quand ce pic franchit le seuil d'un point de bascule — récifs et calottes à 1,5 °C,
-glaciers à 2 °C, Amazonie à 3,5 °C, AMOC à 4 °C — la carte se verrouille et **ne se
-déverrouille plus** : un cadenas apparaît, et l'élément garde un plancher dans le modèle.
+Six éléments du système Terre portent un seuil au-delà duquel une boucle s'entretient
+seule — récifs et calottes à 1,5 °C, permafrost à 1,5 °C, glaciers à 2 °C, Amazonie à
+3,5 °C, AMOC à 4 °C. Quand le réglage affiché franchit l'un d'eux, **un cadenas apparaît
+sur la carte** et l'élément prend un plancher dans le modèle.
 
-Cette mémoire ne vaut que pour vos propres réglages : montez le transport à fond puis
-redescendez-le, les verrous franchis au passage restent fermés. Charger un autre scénario
-repart d'un monde neuf, comme le bouton ↺ — chaque scénario montre donc les seuils qu'il
-franchit lui-même.
+Le cadenas décrit l'état courant, rien de plus : **redescendez et il se rouvre**. Chaque
+réglage rejoue une simulation neuve, sans mémoire de ce qui a été essayé avant, et le
+chemin parcouru n'influe pas sur le résultat.
+
+Ce choix a un coût qu'il faut dire : le climat réel, lui, ne se rejoue pas. Une calotte
+engagée ou un permafrost en dégel ne se referment pas parce qu'on a baissé les émissions
+ensuite. Le cadenas est là pour montrer où sont ces portes et ce qu'il y a derrière, pas
+pour simuler l'irréversibilité.
 
 ### Ce que ça vaut, ce que ça ne vaut pas
 
