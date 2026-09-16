@@ -918,10 +918,9 @@ stage.addEventListener("pointermove",e=>{if(!drag)return;tx=drag.tx+(e.clientX-d
 ["pointerup","pointercancel"].forEach(t=>stage.addEventListener(t,()=>{drag=null;stage.classList.remove("dragging");}));
 stage.addEventListener("wheel",e=>{e.preventDefault();
   const r=stage.getBoundingClientRect();
-  if(e.ctrlKey||e.metaKey){            /* pincement du trackpad, ou ctrl/⌘ + molette */
-    zoom(e.deltaY<0?1.13:1/1.13,e.clientX-r.left,e.clientY-r.top); return; }
-  tx-=e.deltaX; ty-=e.deltaY; applyT();   /* molette et deux doigts : on se déplace */
-},{passive:false});
+  const d=e.deltaMode===1?e.deltaY*16:e.deltaY;      /* lignes ou pixels selon le périphérique */
+  zoom(Math.pow(1.0016,-Math.max(-260,Math.min(260,d))),e.clientX-r.left,e.clientY-r.top);
+},{passive:false});                                  /* molette et pincement : zoom · glissé : déplacement */
 document.getElementById("z-in").onclick=()=>zoom(1.25);
 document.getElementById("z-out").onclick=()=>zoom(1/1.25);
 document.getElementById("z-fit").onclick=fit;

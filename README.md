@@ -32,9 +32,9 @@ Les deux partagent exactement le même modèle et les mêmes données : seule la
 
 ## Se déplacer sur le plateau
 
-Glisser à la souris, ou molette et deux doigts pour se déplacer ; **ctrl + molette**
-(⌘ sur Mac) ou le pincement du trackpad pour zoomer. Double-clic : vue d'ensemble.
-Sous 55 % de zoom, les cartes passent en silhouettes colorées.
+Glisser pour se déplacer, molette ou pincement pour zoomer — le zoom suit l'amplitude
+du geste, donc il reste doux au trackpad et franc à la molette. Double-clic : vue
+d'ensemble. Sous 55 % de zoom, les cartes passent en silhouettes colorées.
 
 ## Démarrer
 

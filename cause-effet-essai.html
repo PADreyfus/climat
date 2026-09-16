@@ -291,7 +291,7 @@ svg .ic{color:var(--ink-3)}
   <div class="t-body"><h3 id="t-h"></h3><p id="t-p"></p></div>
   <div class="t-act"><button id="t-skip">Passer</button><button id="t-next" class="prim">Suivant</button></div>
 </div>
-<div id="hint">Glissez ou molette pour vous déplacer · ctrl+molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
+<div id="hint">Glissez pour vous déplacer · molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
 
 <aside id="sheet" aria-live="polite">
   <div id="grab"></div>
@@ -1404,10 +1404,9 @@ stage.addEventListener("pointermove",e=>{
 }));
 stage.addEventListener("wheel",e=>{e.preventDefault();
   const r=stage.getBoundingClientRect();
-  if(e.ctrlKey||e.metaKey){            /* pincement du trackpad, ou ctrl/⌘ + molette */
-    zoom(e.deltaY<0?1.13:1/1.13,e.clientX-r.left,e.clientY-r.top); return; }
-  tx-=e.deltaX; ty-=e.deltaY; T();   /* molette et deux doigts : on se déplace */
-},{passive:false});
+  const d=e.deltaMode===1?e.deltaY*16:e.deltaY;      /* lignes ou pixels selon le périphérique */
+  zoom(Math.pow(1.0016,-clamp(d,-260,260)),e.clientX-r.left,e.clientY-r.top);
+},{passive:false});                                  /* molette et pincement : zoom · glissé : déplacement */
 stage.addEventListener("dblclick",()=>$("t-fit").click());
 addEventListener("resize",()=>box());
 addEventListener("keydown",e=>{if(e.key==="Escape")close();});
