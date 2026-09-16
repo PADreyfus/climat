@@ -30,6 +30,12 @@ fermés. C'est un banc d'essai ; si la visite tient, elle passera dans l'éditio
 
 Les deux partagent exactement le même modèle et les mêmes données : seule la façade change.
 
+## Se déplacer sur le plateau
+
+Glisser à la souris, ou molette et deux doigts pour se déplacer ; **ctrl + molette**
+(⌘ sur Mac) ou le pincement du trackpad pour zoomer. Double-clic : vue d'ensemble.
+Sous 55 % de zoom, les cartes passent en silhouettes colorées.
+
 ## Démarrer
 
 ```bash

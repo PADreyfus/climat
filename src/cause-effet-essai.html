@@ -274,7 +274,7 @@ svg .ic{color:var(--ink-3)}
   <div class="t-body"><h3 id="t-h"></h3><p id="t-p"></p></div>
   <div class="t-act"><button id="t-skip">Passer</button><button id="t-next" class="prim">Suivant</button></div>
 </div>
-<div id="hint">Survolez une carte pour isoler sa chaîne · cliquez pour la fiche · − et + pour régler</div>
+<div id="hint">Glissez ou molette pour vous déplacer · ctrl+molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
 
 <aside id="sheet" aria-live="polite">
   <div id="grab"></div>
@@ -1385,8 +1385,12 @@ stage.addEventListener("pointermove",e=>{
   if(!pts.size){stage.classList.remove("drag");captured=false;
     if(moved<5&&(e.target===stage||e.target===board||e.target.id==="world"))close();}
 }));
-stage.addEventListener("wheel",e=>{e.preventDefault();const r=stage.getBoundingClientRect();
-  zoom(e.deltaY<0?1.13:1/1.13,e.clientX-r.left,e.clientY-r.top);},{passive:false});
+stage.addEventListener("wheel",e=>{e.preventDefault();
+  const r=stage.getBoundingClientRect();
+  if(e.ctrlKey||e.metaKey){            /* pincement du trackpad, ou ctrl/⌘ + molette */
+    zoom(e.deltaY<0?1.13:1/1.13,e.clientX-r.left,e.clientY-r.top); return; }
+  tx-=e.deltaX; ty-=e.deltaY; T();   /* molette et deux doigts : on se déplace */
+},{passive:false});
 stage.addEventListener("dblclick",()=>$("t-fit").click());
 addEventListener("resize",()=>box());
 addEventListener("keydown",e=>{if(e.key==="Escape")close();});
