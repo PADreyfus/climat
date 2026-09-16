@@ -13,7 +13,14 @@ fichier HTML autonome qui s'ouvre au double-clic.
 
 ---
 
-## Les deux éditions
+## Les éditions
+
+Une troisième page, `cause-effet-essai.html`, est l'édition épurée précédée d'une
+**visite guidée en cinq gestes** : trajectoire actuelle → régler une cause → voir l'onde
+traverser → franchir des seuils → redescendre et constater que les cadenas restent
+fermés. C'est un banc d'essai ; si la visite tient, elle passera dans l'édition normale.
+
+## Les deux éditions principales
 
 | | |
 |---|---|
