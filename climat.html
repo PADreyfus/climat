@@ -1,7 +1,24 @@
-<title>Fresque du Climat Interactive</title>
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Climat Interactive</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    color-scheme: light dark;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  body{ margin:0; font:14px/1.45 system-ui, sans-serif; background:#faf9f7; }
+  img{ max-width:100%; }
+  [hidden]{ display:none !important; }
+</style>
+</head>
+<body>
 <style>
 :root{
   --paper:#E4D5B7; --paper-grain:#D8C6A2;
@@ -185,7 +202,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3
 <div class="app">
   <header class="topbar">
     <div class="brand">
-      <h1>Fresque du Climat</h1>
+      <h1>Climat</h1>
       <span class="sub">Simulateur de causalité</span>
     </div>
     <div class="dials" id="dials"></div>
@@ -219,7 +236,7 @@ input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:3
   </aside>
 
   <main class="stage" id="stage">
-    <svg id="board" role="img" aria-label="Fresque du climat : 42 cartes reliées par des flèches de cause à effet, des activités humaines jusqu'aux conflits armés."></svg>
+    <svg id="board" role="img" aria-label="Climat : 42 cartes reliées par des flèches de cause à effet, des activités humaines jusqu'aux conflits armés."></svg>
     <div class="stagehint" id="stagehint">Glisser pour déplacer · molette pour zoomer · cliquer une carte</div>
     <div class="zoomctl">
       <button id="z-out" aria-label="Dézoomer">−</button>
@@ -246,7 +263,7 @@ const FAM = {
 };
 
 const NODES = [
-{id:1,f:"act",L:0,R:3,n:"Activités humaines",m:"niveau d'activité",d:"Se nourrir, se loger, se déplacer, produire : 8 milliards d'humains, dont le niveau de vie moyen ne cesse de croître. Point de départ de toute la fresque."},
+{id:1,f:"act",L:0,R:3,n:"Activités humaines",m:"niveau d'activité",d:"Se nourrir, se loger, se déplacer, produire : 8 milliards d'humains, dont le niveau de vie moyen ne cesse de croître. Point de départ de tout le graphe."},
 {id:2,f:"act",L:1,R:1,n:"Industrie",m:"production industrielle",d:"Acier, ciment, chimie, biens de consommation. ≈ 16 GtCO₂/an d'émissions directes et indirectes, plus les gaz fluorés du froid et de l'électronique."},
 {id:3,f:"act",L:1,R:2,n:"Utilisation des bâtiments",m:"consommation des bâtiments",d:"Chauffage, eau chaude, climatisation, éclairage : ≈ 7 GtCO₂/an. La climatisation est le poste qui croît le plus vite, en boucle avec les canicules."},
 {id:4,f:"act",L:1,R:3,n:"Transport",m:"trafic",d:"Route, aérien, maritime : ≈ 10 GtCO₂/an, à plus de 90 % au pétrole. Le secteur le moins décarboné à ce jour."},
@@ -263,7 +280,7 @@ const NODES = [
 {id:23,f:"eco",L:6,R:5,n:"Problèmes de calcification",m:"difficulté à calcifier",d:"L'acidification consomme les ions carbonate dont coquilles et squelettes calcaires sont faits. Construire sa coquille coûte de plus en plus d'énergie."},
 {id:15,f:"phy",L:7,R:2,n:"Forçage radiatif",m:"forçage radiatif",d:"Le déséquilibre imposé au système climatique, en W/m². ≈ +2,7 W/m² aujourd'hui, GES moins aérosols. Étendu à la planète, cela équivaut à plusieurs bombes d'Hiroshima par seconde.",anchor:"forc"},
 {id:29,f:"eco",L:7,R:5,n:"Ptéropodes et coccolithophores",m:"déclin du plancton calcaire",d:"Papillons de mer et micro-algues à coque calcaire : base des réseaux trophiques marins et acteurs majeurs de la pompe biologique de carbone."},
-{id:14,f:"phy",L:8,R:2,n:"Bilan énergétique",m:"énergie accumulée",d:"L'énergie piégée se répartit : 91 % dans l'océan, 5 % dans les sols, 3 % dans la fonte des glaces, 1 % dans l'atmosphère. Tout le reste de la fresque découle de cette répartition.",anchor:"forc"},
+{id:14,f:"phy",L:8,R:2,n:"Bilan énergétique",m:"énergie accumulée",d:"L'énergie piégée se répartit : 91 % dans l'océan, 5 % dans les sols, 3 % dans la fonte des glaces, 1 % dans l'atmosphère. Tout le reste du graphe découle de cette répartition.",anchor:"forc"},
 {id:21,f:"phy",L:9,R:1,n:"Hausse de la température",m:"réchauffement en 2100",d:"≈ +1,3 °C au-dessus de 1850-1900 aujourd'hui. Chaque tranche de 1000 GtCO₂ émises ajoute ≈ 0,45 °C, quasi linéairement.",anchor:"dt"},
 {id:17,f:"phy",L:9,R:3,n:"Hausse de la température de l'eau",m:"réchauffement de l'océan",d:"L'océan encaisse 91 % de l'excès d'énergie. Il se dilate, stratifie, perd son oxygène et alimente les cyclones.",anchor:"dt"},
 {id:18,f:"phy",L:9,R:5,n:"Fonte de la banquise",m:"perte de banquise",d:"La banquise arctique d'été a perdu ≈ 40 % de sa surface depuis 1979. Elle flotte : sa fonte n'élève pas le niveau marin, mais elle remplace un miroir blanc par un océan sombre."},
@@ -464,7 +481,7 @@ function physics(S){
   return {fossil,luc,co2,other,aer,af,ppm,forc,dT,slr,ph,sinkflux,budget,perma,
           imbalance:.25*forc};
 }
-/* référence = état des curseurs « trajectoire actuelle » : tous les % de la fresque s'y comparent */
+/* référence = état des curseurs « trajectoire actuelle » : tous les % du graphe s'y comparent */
 const REF=(function(){const d={};LEVERS.forEach(l=>d[l.k]=l.def);const p=physics(d);
   return {co2:p.co2,ghg:p.other,ppm:p.ppm,dt:p.dT,forc:p.forc,slr:p.slr,ph:p.ph,sinkflux:p.sinkflux,af:p.af};})();
 const fr=(v,d=1)=>v.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -732,7 +749,7 @@ function update(){
   });
   /* chaîne causale : tout ce qui remonte jusqu'à la carte et tout ce qui en descend */
   const live=e=>!((!bonus&&(e.B||byId[e.a].b||byId[e.b].b))||(!showFb&&e.fb));
-  const walk=(dir)=>{           // rétroactions exclues : elles reboucleraient sur toute la fresque
+  const walk=(dir)=>{           // rétroactions exclues : elles reboucleraient sur tout le graphe
     const seen=new Set(), q=[sel];
     while(q.length){ const id=q.pop();
       for(const e of (dir==="up"?IN[id]:OUT[id])){
@@ -841,7 +858,7 @@ function detail(){
   </div>
   <div class="d-body"><p>${n.d}</p>
   <div class="mean">${meaning(sel,{p,idx})}</div>${(n.b||n.x)?'<p style="color:var(--ink-3);font-size:12.5px">Carte ajoutée en complément : elle ne fait pas partie des 42 cartes officielles.</p>':""}</div>
-  ${ins?`<div class="links"><h3>Ce qui la provoque</h3>${ins}</div>`:'<div class="empty">Point de départ de la fresque : aucune carte en amont.</div>'}
+  ${ins?`<div class="links"><h3>Ce qui la provoque</h3>${ins}</div>`:'<div class="empty">Point de départ du graphe : aucune carte en amont.</div>'}
   ${outs?`<div class="links"><h3>Ce qu'elle provoque</h3>${outs}</div>`:'<div class="empty">Bout de chaîne : aucune carte en aval.</div>'}
   <div class="foot">Valeurs affichées pour 2100, si le niveau d'émissions choisi était maintenu. Le pourcentage compare au scénario « trajectoire actuelle » (≈ +2,8 °C).</div>`;
   document.getElementById("detail").querySelectorAll("[data-go]").forEach(b=>{
@@ -934,3 +951,6 @@ buildPresets(); buildLevers(); markPreset(0); update(); home();
 setTimeout(()=>{const h=document.getElementById("stagehint");if(h)h.style.opacity=".0";},6000);
 document.getElementById("stagehint").style.transition="opacity .8s";
 </script>
+
+</body>
+</html>

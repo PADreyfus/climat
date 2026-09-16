@@ -1,7 +1,7 @@
 # Le modèle
 
 Deux couches, qu'il faut se garder de confondre : un petit **noyau physique** réellement
-chiffré, et une **propagation relative** pour tout le reste de la fresque.
+chiffré, et une **propagation relative** pour tout le reste du graphe.
 
 Tout est dans `src/*.html`, fonction `physics()` pour la première couche et `compute()`
 pour la seconde. Aucune donnée n'est chargée depuis l'extérieur : les constantes sont
@@ -81,7 +81,7 @@ Tous les curseurs au repos, le modèle donne :
 | pH de l'océan | 7,96 | ≈ 8,05 aujourd'hui |
 | Budget 1,5 °C | 6 ans | épuisé vers 2030 |
 
-C'est cet état qui sert de **référence** : tous les pourcentages de la fresque s'y
+C'est cet état qui sert de **référence** : tous les pourcentages du graphe s'y
 comparent, et il est recalculé au chargement plutôt que codé en dur, pour que l'écart
 affiché soit exactement nul quand on ne touche à rien.
 

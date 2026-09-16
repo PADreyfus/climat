@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Fresque du Climat — simulateur interactif</title>
+<title>Climat — simulateur interactif</title>
 <style>
 :root{
   color-scheme:light dark;
@@ -51,7 +51,7 @@ a{color:var(--accent)}
 <body>
 <div class="wrap">
   <header>
-    <h1>La fresque du climat, en simulateur</h1>
+    <h1>Le climat, en simulateur</h1>
     <p class="lede">Les 42 cartes de l'atelier reliées par leurs liens de cause à effet — plus dix cartes ajoutées. On déplace une cause, et l'onde traverse la chaîne jusqu'aux conséquences humaines.</p>
   </header>
 
@@ -64,10 +64,10 @@ a{color:var(--accent)}
         <span class="go">Ouvrir&nbsp;→</span>
       </div>
     </a>
-    <a class="ed" href="fresque.html">
-      <img src="docs/img/fresque.png" alt="Le plateau atelier sur fond kraft, avec ses six indicateurs en haut et ses huit curseurs dans le rail de gauche.">
+    <a class="ed" href="climat.html">
+      <img src="docs/img/climat.png" alt="Le plateau atelier sur fond kraft, avec ses six indicateurs en haut et ses huit curseurs dans le rail de gauche.">
       <div class="txt">
-        <h2>Fresque du Climat</h2>
+        <h2>Climat</h2>
         <p>Édition atelier. Six indicateurs, huit curseurs visibles d'un coup d'œil, numéros de cartes conservés pour suivre le jeu physique.</p>
         <span class="go">Ouvrir&nbsp;→</span>
       </div>
@@ -90,7 +90,7 @@ a{color:var(--accent)}
   <section>
     <h3>En local</h3>
     <pre>git clone &lt;url-du-dépôt&gt;
-cd fresque-climat
+cd climat
 open index.html        # ou : python3 -m http.server</pre>
     <p>Aucune installation, aucun serveur nécessaire : chaque page est un fichier HTML autonome. Les sources d'édition sont dans <code>src/</code>, les pages servies sont régénérées par <code>node tools/build.mjs</code>.</p>
   </section>

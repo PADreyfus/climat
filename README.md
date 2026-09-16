@@ -1,6 +1,6 @@
-# Fresque du Climat — simulateur interactif
+# Climat — simulateur interactif
 
-Les 42 cartes de l'atelier de la Fresque du Climat, reliées par leurs liens de cause à
+Les 42 cartes de l'atelier, reliées par leurs liens de cause à
 effet, avec un modèle physique derrière : on déplace une cause — le transport, la
 déforestation, la part des énergies fossiles — et l'onde traverse la chaîne jusqu'aux
 famines, aux déplacements de populations et aux conflits armés.
@@ -24,8 +24,8 @@ fermés. C'est un banc d'essai ; si la visite tient, elle passera dans l'éditio
 
 | | |
 |---|---|
-| [**Climat, Cause à Effet**](cause-effet.html) — édition épurée | [**Fresque du Climat**](fresque.html) — édition atelier |
-| ![](docs/img/cause-effet.png) | ![](docs/img/fresque.png) |
+| [**Climat, Cause à Effet**](cause-effet.html) — édition épurée | [**Climat**](climat.html) — édition atelier |
+| ![](docs/img/cause-effet.png) | ![](docs/img/climat.png) |
 | Un seul chiffre en grand, les réglages posés sur les cartes elles-mêmes, une fiche qui glisse depuis le bord. Police système, pictogramme par carte, onde de propagation animée. | Six indicateurs en bandeau, huit curseurs visibles en permanence, numéros de cartes conservés pour suivre le jeu physique posé sur la table. |
 
 Les deux partagent exactement le même modèle et les mêmes données : seule la façade change.
@@ -40,7 +40,7 @@ d'ensemble. Sous 55 % de zoom, les cartes passent en silhouettes colorées.
 
 ```bash
 git clone <url-du-dépôt>
-cd fresque-climat
+cd climat
 open index.html            # macOS — ou double-clic, ou :
 python3 -m http.server     # puis http://localhost:8000
 ```
@@ -50,7 +50,7 @@ python3 -m http.server     # puis http://localhost:8000
 ```
 index.html            page d'accueil (choix de l'édition)
 cause-effet.html      édition épurée — page servie, générée
-fresque.html          édition atelier — page servie, générée
+climat.html           édition atelier — page servie, générée
 src/                  les sources d'édition
 tools/build.mjs       enveloppe src/*.html dans un document HTML complet
 docs/modele.md        le modèle physique, ses constantes et ses limites

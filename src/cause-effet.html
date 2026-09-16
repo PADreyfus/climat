@@ -271,7 +271,7 @@ const FAM = {
 };
 
 const NODES = [
-{id:1,f:"act",L:0,R:3,n:"Activités humaines",m:"niveau d'activité",d:"Se nourrir, se loger, se déplacer, produire : 8 milliards d'humains, dont le niveau de vie moyen ne cesse de croître. Point de départ de toute la fresque."},
+{id:1,f:"act",L:0,R:3,n:"Activités humaines",m:"niveau d'activité",d:"Se nourrir, se loger, se déplacer, produire : 8 milliards d'humains, dont le niveau de vie moyen ne cesse de croître. Point de départ de tout le graphe."},
 {id:2,f:"act",L:1,R:1,n:"Industrie",m:"production industrielle",d:"Acier, ciment, chimie, biens de consommation. ≈ 16 GtCO₂/an d'émissions directes et indirectes, plus les gaz fluorés du froid et de l'électronique."},
 {id:3,f:"act",L:1,R:2,n:"Utilisation des bâtiments",m:"consommation des bâtiments",d:"Chauffage, eau chaude, climatisation, éclairage : ≈ 7 GtCO₂/an. La climatisation est le poste qui croît le plus vite, en boucle avec les canicules."},
 {id:4,f:"act",L:1,R:3,n:"Transport",m:"trafic",d:"Route, aérien, maritime : ≈ 10 GtCO₂/an, à plus de 90 % au pétrole. Le secteur le moins décarboné à ce jour."},
@@ -288,7 +288,7 @@ const NODES = [
 {id:23,f:"eco",L:6,R:5,n:"Problèmes de calcification",m:"difficulté à calcifier",d:"L'acidification consomme les ions carbonate dont coquilles et squelettes calcaires sont faits. Construire sa coquille coûte de plus en plus d'énergie."},
 {id:15,f:"phy",L:7,R:2,n:"Forçage radiatif",m:"forçage radiatif",d:"Le déséquilibre imposé au système climatique, en W/m². ≈ +2,7 W/m² aujourd'hui, GES moins aérosols. Étendu à la planète, cela équivaut à plusieurs bombes d'Hiroshima par seconde.",anchor:"forc"},
 {id:29,f:"eco",L:7,R:5,u:"déclin",n:"Ptéropodes et coccolithophores",m:"déclin du plancton calcaire",d:"Papillons de mer et micro-algues à coque calcaire : base des réseaux trophiques marins et acteurs majeurs de la pompe biologique de carbone."},
-{id:14,f:"phy",L:8,R:2,n:"Bilan énergétique",m:"énergie accumulée",d:"L'énergie piégée se répartit : 91 % dans l'océan, 5 % dans les sols, 3 % dans la fonte des glaces, 1 % dans l'atmosphère. Tout le reste de la fresque découle de cette répartition.",anchor:"forc"},
+{id:14,f:"phy",L:8,R:2,n:"Bilan énergétique",m:"énergie accumulée",d:"L'énergie piégée se répartit : 91 % dans l'océan, 5 % dans les sols, 3 % dans la fonte des glaces, 1 % dans l'atmosphère. Tout le reste du graphe découle de cette répartition.",anchor:"forc"},
 {id:21,f:"phy",L:9,R:1,n:"Hausse de la température",m:"réchauffement en 2100",d:"≈ +1,3 °C au-dessus de 1850-1900 aujourd'hui. Chaque tranche de 1000 GtCO₂ émises ajoute ≈ 0,45 °C, quasi linéairement.",anchor:"dt"},
 {id:17,f:"phy",L:9,R:3,n:"Hausse de la température de l'eau",m:"réchauffement de l'océan",d:"L'océan encaisse 91 % de l'excès d'énergie. Il se dilate, stratifie, perd son oxygène et alimente les cyclones.",anchor:"dtw"},
 {id:18,f:"phy",L:9,R:5,n:"Fonte de la banquise",m:"perte de banquise",d:"La banquise arctique d'été a perdu ≈ 40 % de sa surface depuis 1979. Elle flotte : sa fonte n'élève pas le niveau marin, mais elle remplace un miroir blanc par un océan sombre."},
@@ -490,7 +490,7 @@ function physics(S,L,noFb){
   return {fossil,luc,co2,other,aer,af,ppm,forc,dT,slr,ph,sinkflux,budget,perma,
           imbalance:.25*forc};
 }
-/* référence = état des curseurs « trajectoire actuelle » : tous les % de la fresque s'y comparent */
+/* référence = état des curseurs « trajectoire actuelle » : tous les % du graphe s'y comparent */
 const REF=(function(){const d={};LEVERS.forEach(l=>d[l.k]=l.def);const p=physics(d);
   return {co2:p.co2,ghg:p.other,ppm:p.ppm,dt:p.dT,forc:p.forc,slr:p.slr,ph:p.ph,sinkflux:p.sinkflux,af:p.af};})();
 const fr=(v,d=1)=>v.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
