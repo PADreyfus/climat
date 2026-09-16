@@ -116,7 +116,7 @@ multiplicateurs de risque.
 
 ---
 
-## 2. La propagation dans le graphe (35 cartes)
+## 2. La propagation dans le graphe (40 cartes)
 
 « Intensité des sécheresses » n'a pas d'unité. Chaque carte non physique porte donc un
 **indice**, 1 = trajectoire tenue (+1,7 °C) :

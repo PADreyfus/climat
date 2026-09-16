@@ -354,7 +354,7 @@ svg .ic{color:var(--ink-3)}
   <div class="t-body"><h3 id="t-h"></h3><p id="t-p"></p></div>
   <div class="t-act"><button id="t-skip">Passer</button><button id="t-next" class="prim">Suivant</button></div>
 </div>
-<div id="ver">v1.4.1</div>
+<div id="ver">v1.5.0</div>
 <div id="hint">Glissez pour vous déplacer · molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
 
 <aside id="sheet" aria-live="polite">
@@ -426,7 +426,12 @@ const NODES = [
 {id:48,f:"eco",L:12,R:5,n:"Dépérissement de l'Amazonie",x:1,m:"risque de bascule",d:"Entre 20 et 25 % de déforestation, la forêt ne recycle plus assez d'humidité et bascule vers la savane, relâchant des dizaines de GtC. On est à ≈ 17 %.",g:2.0},
 {id:50,f:"eco",L:12,R:6,u:"perte",n:"Ressources halieutiques",x:1,m:"perte de pêche",d:"3 milliards de personnes tirent 20 % de leurs protéines animales de la mer. Les stocks migrent vers les pôles et le potentiel de capture tropical chute de 40 % à +3 °C."},
 {id:52,f:"hum",L:12,R:0,n:"Stress thermique au travail",b:1,m:"heures de travail perdues",d:"Au-delà de 35 °C de température humide, le corps ne peut plus se refroidir. Des centaines de milliards d'heures de travail agricole et de BTP sont déjà perdues chaque année.",g:2.2},
-{id:51,f:"hum",L:14,R:6,n:"Crise économique",x:1,m:"coût des dommages",d:"≈ 250 Md$ de dommages climatiques par an. Là où le risque devient inassurable, la valeur immobilière s'effondre avant que l'eau n'arrive."}
+{id:51,f:"hum",L:14,R:6,n:"Crise économique",x:1,m:"coût des dommages",d:"≈ 250 Md$ de dommages climatiques par an. Là où le risque devient inassurable, la valeur immobilière s'effondre avant que l'eau n'arrive."},
+{id:53,f:"eco",L:11,R:4,u:"perte",n:"Pollinisateurs",x:1,m:"pression sur la pollinisation",d:"≈ 75 % des types de cultures dépendent au moins en partie d'un pollinisateur animal, et 35 % de la production alimentaire en volume. Abeilles sauvages et insectes reculent sous l'effet conjugué du climat, des pesticides et de la perte d'habitat.",g:1.3},
+{id:54,f:"eco",L:12,R:1,n:"Dégradation des sols",x:1,m:"état des sols",d:"Un sol vivant met des siècles à se former et se perd en quelques saisons. L'érosion, le tassement et la perte de matière organique réduisent le rendement, et la capacité du sol à retenir l'eau comme le carbone."},
+{id:55,f:"eco",L:11,R:6,n:"Décalage phénologique",x:1,m:"désynchronisation",d:"Le printemps avance de 2 à 3 jours par décennie. Quand la floraison précède l'arrivée des pollinisateurs, ou l'éclosion des chenilles le retour des oiseaux, la chaîne se désynchronise : chaque espèce suit le thermomètre à sa propre vitesse.",g:1.2},
+{id:56,f:"phy",L:12,R:7,n:"Refroidissement de l'Europe du Nord",x:1,m:"refroidissement régional",d:"Si l'AMOC faiblit, l'Europe du Nord perd la chaleur que l'Atlantique lui apporte : −5 à −10 °C sur les côtes, en plein réchauffement mondial. Plus froid, plus venteux, et des saisons agricoles raccourcies.",g:1.4},
+{id:57,f:"phy",L:12,R:4,n:"Déplacement des moussons",x:1,m:"déplacement des pluies",d:"Les moussons suivent la bande de convergence tropicale. Un affaiblissement de l'AMOC et les aérosols la déplacent vers le sud : les pluies arrivent ailleurs, ou plus tard, pour des milliards de personnes qui règlent leurs semis dessus.",g:1.3}
 ];
 
 /* ---- liens de causalité (a → b). why = ce que la flèche transporte ---- */
@@ -536,7 +541,38 @@ const EDGES = [
 {a:33,b:51,w:.7,why:"littoraux inassurables"},
 {a:34,b:51,w:.7,why:"ouragans : les sinistres les plus coûteux"},
 {a:35,b:51,w:.5,why:"incendies de forêt et d'interface"},
-{a:51,b:42,w:.5,why:"se protéger coûte cher"}
+{a:51,b:42,w:.5,why:"se protéger coûte cher"},
+
+/* ---- pollinisation, sols, phénologie : la chaîne du vivant vers l'assiette ---- */
+{a:25,b:53,w:.9,why:"moins d'espèces, moins de pollinisateurs"},
+{a:36,b:53,w:.4,why:"les canicules tuent les colonies"},
+{a:8,b:53,w:.4,why:"pesticides et monoculture"},
+{a:53,b:32,w:.6,why:"sans pollinisation, pas de fruit"},
+{a:6,b:54,w:.7,why:"sol nu, sol emporté"},
+{a:30,b:54,w:.6,why:"un sol sec part au vent"},
+{a:8,b:54,w:.5,why:"labour et tassement"},
+{a:54,b:32,w:.5,why:"un sol dégradé rend moins"},
+{a:21,b:55,w:.9,why:"le printemps avance avec le thermomètre"},
+{a:20,b:55,w:.3,why:"les pluies calent aussi le cycle"},
+{a:55,b:25,w:.5,why:"les cycles se décalent entre espèces"},
+{a:55,b:53,w:.5,why:"la fleur n'attend plus l'insecte"},
+
+/* ---- ce que l'AMOC entraîne vraiment ---- */
+{a:47,b:56,w:1,why:"l'Atlantique cesse d'apporter sa chaleur"},
+{a:56,b:32,w:.4,why:"saisons agricoles raccourcies"},
+{a:56,b:51,w:.3,why:"une économie à refaire"},
+{a:47,b:57,w:.7,why:"la bande des pluies descend"},
+{a:10,b:57,w:.5,why:"les aérosols refroidissent l'hémisphère nord et tirent les pluies vers le sud"},
+{a:57,b:31,w:.5,why:"la pluie n'arrive plus au même endroit"},
+{a:57,b:32,w:.4,why:"les semis ratent la pluie"},
+{a:57,b:39,w:.4,why:"on part quand la pluie ne vient plus"},
+
+/* ---- liens qui manquaient, indépendamment des cartes ci-dessus ---- */
+{a:35,b:49,w:.5,why:"la fumée des feux est une pollution de l'air"},
+{a:30,b:25,w:.5,why:"la sécheresse vide les habitats"},
+{a:35,b:25,w:.4,why:"ce qui brûle ne revient pas tout de suite"},
+{a:31,b:37,w:.6,why:"sans eau, pas de récolte"},
+{a:25,b:38,w:.3,why:"un écosystème appauvri soigne moins bien"}
 ];
 
 /* ============================================================
@@ -803,7 +839,12 @@ lock:'<rect x="5" y="10.5" width="14" height="10" rx="2.2"/><path d="M8 10.5V7.5
 49:'<path d="M6.5 16.5a3.8 3.8 0 0 1-.4-7.6 5.5 5.5 0 0 1 10.6-1.3 4.4 4.4 0 0 1 .8 8.7z"/><circle cx="8" cy="20" r="1.1" '+D+'/><circle cx="13" cy="20.5" r=".9" '+D+'/><circle cx="17.5" cy="19.5" r="1.1" '+D+'/>',
 50:'<path d="M2.5 10.5c2.6-3.8 6-5.5 9.3-5.5 2.1 0 3.8.7 5.1 1.7-1.3 1-2 2.4-2 3.8s.7 2.8 2 3.8c-1.3 1-3 1.7-5.1 1.7-3.3 0-6.7-1.7-9.3-5.5z"/><circle cx="6.5" cy="9.5" r=".8" '+D+'/><path d="M18.5 15v6M16.1 18.6l2.4 2.4 2.4-2.4"/>',
 51:'<circle cx="9.5" cy="9.5" r="6.5"/><path d="M12 7c-.6-.5-1.4-.8-2.3-.8-1.9 0-3.2 1.5-3.2 3.3s1.3 3.3 3.2 3.3c.9 0 1.7-.3 2.3-.8M6.5 9.5h4"/><path d="M18 14v7M15.6 18.6 18 21l2.4-2.4"/>',
-52:'<circle cx="9.5" cy="4.5" r="2.2"/><path d="M9.5 7.5 6.5 13l2.2 1.3.8 7M9.5 7.5l3.2 2.2.8 3.3M6.5 13 4 16M11.5 21.5 9.5 14"/><path d="M17 4c-1.2 1.2-1.2 2.4 0 3.6s1.2 2.4 0 3.6M20.5 4c-1.2 1.2-1.2 2.4 0 3.6s1.2 2.4 0 3.6"/>'
+53:'<ellipse cx="12" cy="14.5" rx="3" ry="4.5"/><path d="M12 10.5V19M9 12.5h6M9 16h6"/><path d="M9.2 10.2C7.4 8 4.6 8.2 3.6 9.6c-1 1.4.4 3.6 2.9 3.6M14.8 10.2C16.6 8 19.4 8.2 20.4 9.6c1 1.4-.4 3.6-2.9 3.6"/><path d="M10.6 6.6 9.4 4.4M13.4 6.6l1.2-2.2"/>',
+54:'<path d="M3 8.5h18M3 13h18M3 17.5h18"/><path d="M8 8.5 6.5 13l2 4.5M15.5 8.5 17 13l-1.5 4.5"/><path d="M11 3.5v3.4M11 3.5l1.8 1.6"/>',
+55:'<circle cx="8" cy="12" r="4.5"/><path d="M8 9.2V12l1.9 1.2"/><path d="M16.2 7.5c2.8 0 4.3 2 4.3 4.3 0 2.8-2.3 4.7-4.3 4.7"/><path d="M18.4 5.3 16.2 7.5l2.2 2.2"/>',
+56:'<path d="M12 3v18M12 3 9.6 5.4M12 3l2.4 2.4M12 21l-2.4-2.4M12 21l2.4-2.4"/><path d="m4.2 7.5 15.6 9M4.2 7.5l.3 3.3M4.2 7.5l3.2-.9M19.8 16.5l-.3-3.3M19.8 16.5l-3.2.9"/><path d="m4.2 16.5 15.6-9M4.2 16.5l3.2.9M4.2 16.5l.3-3.3"/>',
+52:'<circle cx="9.5" cy="4.5" r="2.2"/><path d="M9.5 7.5 6.5 13l2.2 1.3.8 7M9.5 7.5l3.2 2.2.8 3.3M6.5 13 4 16M11.5 21.5 9.5 14"/><path d="M17 4c-1.2 1.2-1.2 2.4 0 3.6s1.2 2.4 0 3.6M20.5 4c-1.2 1.2-1.2 2.4 0 3.6s1.2 2.4 0 3.6"/>',
+57:'<path d="M7 11.5a3.5 3.5 0 0 1 .5-7 5 5 0 0 1 9.4 1.6 3.2 3.2 0 0 1-.4 6.4z" /><path d="M8 15.5 6.5 19M12 15.5 10.5 19M16 15.5 14.5 19"/><path d="M18.5 17.5h3M20.6 15.9l1.4 1.6-1.4 1.6"/>'
 };
 
 Object.keys(ICON).forEach(id=>{
@@ -1119,7 +1160,12 @@ const REPERE={
 49:"Ce sont les mêmes cheminées : chaque tonne de CO₂ évitée évite aussi des particules. Le bénéfice sanitaire est immédiat et local, il n'attend pas 2100.",
 50:"Les stocks de poissons remontent vers les pôles de ≈ 50 km par décennie : les zones de pêche quittent les eaux de ceux qui en dépendent le plus.",
 51:"Le risque devient inassurable bien avant d'être invivable : l'assureur part le premier, et la valeur du bien s'effondre avec lui.",
-52:"Ce seuil n'a presque jamais été franchi dans l'histoire humaine. Il l'a été une poignée de fois depuis 2000, dans le Golfe et en Asie du Sud."
+52:"Ce seuil n'a presque jamais été franchi dans l'histoire humaine. Il l'a été une poignée de fois depuis 2000, dans le Golfe et en Asie du Sud.",
+53:"Une ruche d'abeilles domestiques ne remplace pas les quelque 20 000 espèces de pollinisateurs sauvages : ce sont elles qui assurent l'essentiel de la pollinisation des cultures et des plantes sauvages.",
+54:"Un tiers des sols de la planète est déjà dégradé. Un sol se perd 10 à 100 fois plus vite qu'il ne se reconstitue : quelques saisons contre plusieurs siècles.",
+55:"En Europe, les arbres débourrent environ deux semaines plus tôt qu'il y a cinquante ans. Les oiseaux migrateurs, eux, se règlent surtout sur la durée du jour — qui, elle, n'a pas bougé.",
+56:"Oslo est à la latitude d'Anchorage, Édimbourg à celle de Moscou. C'est la circulation atlantique qui fait toute la différence, et c'est elle qui est en jeu.",
+57:"La mousson d'Asie du Sud apporte 70 à 80 % des pluies annuelles de l'Inde en quatre mois. Un décalage de deux semaines déplace toute la saison agricole d'un sous-continent."
 };
 const erf=x=>{const s=x<0?-1:1;x=Math.abs(x);const t=1/(1+.3275911*x);
   return s*(1-((((1.061405429*t-1.453152027)*t+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x));};

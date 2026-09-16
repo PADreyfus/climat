@@ -5,8 +5,12 @@ physique derrière : on déplace une cause — le transport, la déforestation, 
 énergies fossiles — et l'onde traverse la chaîne jusqu'aux famines, aux déplacements de
 populations et aux conflits armés.
 
-Dix cartes absentes du jeu officiel ont été ajoutées, dont quatre en permanence
-(pollution de l'air, circulation océanique, ressources halieutiques, crise économique).
+Quinze cartes absentes du jeu officiel ont été ajoutées, dont neuf en permanence :
+pollution de l'air, circulation océanique, ressources halieutiques, crise économique, puis
+**pollinisateurs, dégradation des sols, décalage phénologique, refroidissement de l'Europe
+du Nord et déplacement des moussons**. Les cinq dernières creusent deux chaînes qui
+restaient sommaires — la biodiversité terrestre, qui ne menait à l'assiette que par un lien
+direct, et l'AMOC, dont toutes les conséquences n'existaient qu'en prose.
 
 **Aucune dépendance, aucun build obligatoire, aucun serveur** : une seule page HTML
 autonome, qui s'ouvre au double-clic.
