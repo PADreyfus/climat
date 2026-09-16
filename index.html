@@ -295,7 +295,7 @@ svg .ic{color:var(--ink-3)}
   <div id="h-out">
     <button id="out-h" aria-expanded="true">Ce que ça coûte en 2100<span class="chev">⌃</span></button>
     <div id="out-list"></div>
-    <p id="out-key">Chiffres <b class="w">rouges</b> : pire que la trajectoire actuelle · <b class="c">bleus</b> : mieux.
+    <p id="out-key">Tous les % du plateau se comptent <b>depuis une trajectoire tenue (+1,7 °C)</b> : à « Actuel », ils disent ce que la trajectoire actuelle coûte déjà. <b class="w">Rouges</b> : pire qu'au chargement · <b class="c">bleus</b> : mieux.
       <span class="lk"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><use href="#ic-lock"/></svg> seuil de bascule franchi à cette température.</span>
       <button id="src-b">Sources et méthode ›</button></p>
   </div>
@@ -317,7 +317,7 @@ svg .ic{color:var(--ink-3)}
   <div class="t-body"><h3 id="t-h"></h3><p id="t-p"></p></div>
   <div class="t-act"><button id="t-skip">Passer</button><button id="t-next" class="prim">Suivant</button></div>
 </div>
-<div id="ver">v1.1.0</div>
+<div id="ver">v1.2.0</div>
 <div id="hint">Glissez pour vous déplacer · molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
 
 <aside id="sheet" aria-live="polite">
@@ -389,7 +389,7 @@ const NODES = [
 {id:48,f:"eco",L:12,R:5,n:"Dépérissement de l'Amazonie",x:1,m:"risque de bascule",d:"Entre 20 et 25 % de déforestation, la forêt ne recycle plus assez d'humidité et bascule vers la savane, relâchant des dizaines de GtC. On est à ≈ 17 %.",g:2.0},
 {id:50,f:"eco",L:12,R:6,u:"perte",n:"Ressources halieutiques",x:1,m:"perte de pêche",d:"3 milliards de personnes tirent 20 % de leurs protéines animales de la mer. Les stocks migrent vers les pôles et le potentiel de capture tropical chute de 40 % à +3 °C."},
 {id:52,f:"hum",L:12,R:0,n:"Stress thermique au travail",b:1,m:"heures de travail perdues",d:"Au-delà de 35 °C de température humide, le corps ne peut plus se refroidir. Des centaines de milliards d'heures de travail agricole et de BTP sont déjà perdues chaque année.",g:2.2},
-{id:51,f:"hum",L:14,R:6,n:"Coût économique et assurances",x:1,m:"coût des dommages",d:"≈ 250 Md$ de dommages climatiques par an. Là où le risque devient inassurable, la valeur immobilière s'effondre avant que l'eau n'arrive."}
+{id:51,f:"hum",L:14,R:6,n:"Crise économique",x:1,m:"coût des dommages",d:"≈ 250 Md$ de dommages climatiques par an. Là où le risque devient inassurable, la valeur immobilière s'effondre avant que l'eau n'arrive."}
 ];
 
 /* ---- liens de causalité (a → b). why = ce que la flèche transporte ---- */
@@ -556,7 +556,7 @@ function physics(S,L,noFb){
   return {fossil,luc,co2,other,aer,af,ppm,forc,dT,slr,ph,sinkflux,budget,perma,
           imbalance:.25*forc};
 }
-/* référence = état des curseurs « trajectoire actuelle » : tous les % du graphe s'y comparent */
+/* référence = trajectoire tenue (+1,7 °C) : tous les % du graphe s'y comparent (voir refIdx) */
 const REF=(function(){const d={};LEVERS.forEach(l=>d[l.k]=l.def);const p=physics(d);
   return {co2:p.co2,ghg:p.other,ppm:p.ppm,dt:p.dT,forc:p.forc,slr:p.slr,ph:p.ph,sinkflux:p.sinkflux,af:p.af};})();
 const fr=(v,d=1)=>v.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
@@ -858,39 +858,30 @@ NODES.forEach(n=>{
 const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
 const $=id=>document.getElementById(id);
 let cur=null,last=null,anim=0,chain=null,pulseTok=0;
-/* Référence des indices — le MÊME pipeline, curseurs au repos.
-   Sans elle, les multiplicateurs des seuils déjà franchis sur la trajectoire actuelle
-   (récifs ×1,5, calottes ×1,25, glaciers ×1,3) étaient comptés dans l'état affiché mais
-   absents de la référence : au repos, sans avoir rien touché, les cartes annonçaient
-   « +50 % biodiversité marine », « +24 % famines », « +12 % conflits ». Des artefacts
-   de normalisation, pas des prévisions.
+/* Référence des indices — le MÊME pipeline, mais réglé sur une trajectoire qui tient
+   ~1,5 °C (le préréglage « Neutralité », +1,54 °C).
+   Le plateau mesure donc tout depuis un monde tenu, pas depuis la trajectoire actuelle :
+   à « Actuel », sans rien toucher, chaque carte affiche ce que cette trajectoire coûte
+   déjà. Prendre la trajectoire actuelle comme référence la comparait à elle-même, et
+   toutes les cartes affichaient 0 %.
+   Passer par le même compute() est indispensable : sur la trajectoire actuelle, quatre
+   seuils de bascule sont franchis et leurs multiplicateurs s'appliquent à l'état affiché.
    Le cache dépend de showOpt, parce que compute() ignore les cartes optionnelles. */
+/* Pas de captage ici, délibérément : avec ccs:5 le CO₂ net tombe à zéro, et cinq cartes
+   (émissions, puits, acidification, calcification, ptéropodes) valent alors 0 — on ne peut
+   pas diviser par elles. C'est la trajectoire la plus basse que le modèle exprime sans
+   dégénérer : +1,67 °C, 3,7 GtCO₂/an nets, 431 ppm. */
+const TRAJREF={ind:40,bat:30,tra:30,agr:65,def:10,low:85,sink:130,ccs:0};
 const REFIDX={};
 function refIdx(){
   const k=showOpt?"opt":"base";
   if(!REFIDX[k]){
     const save={...S};
-    LEVERS.forEach(l=>S[l.k]=l.def);
+    Object.assign(S,TRAJREF);
     REFIDX[k]=compute().idx;
     Object.assign(S,save);
   }
   return REFIDX[k];
-}
-/* Seconde référence : une trajectoire qui tient ~1,5 °C (le préréglage « Neutralité »).
-   Famine et conflit armé sont des indices ordinaux : rapportés à la trajectoire actuelle
-   ils valent 0 % au repos, ce qui laisse croire que ne rien faire ne coûte rien. Rapportés
-   à un monde à 1,5 °C, ils disent ce que la trajectoire actuelle coûte déjà. */
-const REF15={};
-function ref15(){
-  const k=showOpt?"opt":"base";
-  if(!REF15[k]){
-    const save={...S};
-    Object.assign(S,{ind:40,bat:30,tra:30,agr:65,def:10,low:85,sink:130,ccs:5});
-    const raw=compute().idx, base=refIdx();
-    REF15[k]={}; for(const j in raw) REF15[k][j]=raw[j]/(base[j]||1);
-    Object.assign(S,save);
-  }
-  return REF15[k];
 }
 function snap(){
   const r=compute(), ref=refIdx(), idx={};
@@ -1125,7 +1116,7 @@ function courbe(dT){
 const DYN={
  7:s=>`Ce scénario rejette ${fr(s.p.co2)} Gt de CO₂ par an, soit ≈ ${Math.round(s.p.co2*1e9/31.5e6)} tonnes chaque seconde.`,
  9:s=>`${fr(s.p.other)} GtCO₂e par an, dont l'essentiel en méthane : le gaz sur lequel une baisse se voit en une décennie, pas en un siècle.`,
- 10:s=>`Les aérosols sont à ${pct0(s.idx[10]-1)} de la trajectoire actuelle. Moins de combustion, c'est un air plus respirable — et un parasol en moins.`,
+ 10:s=>`Les aérosols sont à ${pct0(s.idx[10]-1)} d'une trajectoire tenue (+1,7 °C). Moins de combustion, c'est un air plus respirable — et un parasol en moins.`,
  11:s=>{const c=s.p.ppm;return `${Math.round(c)} ppm : un niveau que la Terre n'avait plus connu depuis ${c<450?"≈ 3 millions":c<600?"15 à 30 millions":"plus de 30 millions"} d'années.`;},
  12:s=>`Les puits absorbent ${Math.round((1-s.p.af)*100)} % des émissions, soit ${fr(s.p.sinkflux)} Gt par an. Sans eux, la concentration monterait deux fois plus vite.`,
  14:s=>`≈ ${Math.round(s.p.imbalance*16)} zettajoules accumulés par an, soit l'équivalent de ${Math.round(s.p.imbalance*5.1e14/63e12)} bombes d'Hiroshima par seconde, en continu.`,
@@ -1139,7 +1130,7 @@ const DYN={
    `<span style="font-size:12px;opacity:.75">Le dernier âge glaciaire était ≈ 5 °C sous l'époque préindustrielle, avec trois kilomètres de glace sur le Canada. Nous parcourons l'écart inverse plus de vingt fois plus vite.</span>`;},
  22:s=>`+${Math.round(s.p.slr*100)} cm d'ici 2100 — et la hausse ne s'arrête pas en 2100 : elle est engagée pour des siècles.`,
  24:s=>`pH ${fr(s.p.ph,2)}, soit ${Math.round((Math.pow(10,8.2-s.p.ph)-1)*100)} % d'ions H⁺ de plus qu'en 1850.`,
- 32:s=>`${pct0(s.idx[32]-1)} par rapport à la trajectoire actuelle. À l'échelle d'un pays, quelques pour cent de rendement en moins suffisent à faire flamber les prix.`,
+ 32:s=>`${pct0(s.idx[32]-1)} par rapport à une trajectoire tenue (+1,7 °C). À l'échelle d'un pays, quelques pour cent de rendement en moins suffisent à faire flamber les prix.`,
  36:s=>{const r=retour(s.p.dT);
    return `Un été de type 2003 revient ici <b>${r<1.3?"presque chaque année":"environ une année sur "+Math.round(r)}</b>. Ce qui était exceptionnel devient la normale — et le nouvel exceptionnel se situe bien plus haut.`;},
  41:s=>`≈ ${fr(s.p.perma*1.6)} Gt de CO₂e s'échappent chaque année des sols dégelés : l'équivalent de ${Math.round(s.p.perma*1.6/.4)} fois les émissions annuelles de la France, sans qu'aucun humain n'y soit pour quelque chose.`
@@ -1186,10 +1177,8 @@ const IMPACT=[
  {go:36,n:s=>niche(s.p.dT), f:v=>v<60?"< 100 M":md(v), l:"de personnes hors de la zone climatique habitable"},
  {go:27,n:s=>recifs(s.p.dT), f:v=>Math.round(v)+" %", l:"des récifs coralliens perdus",
   sub:s=>"la moitié a déjà disparu depuis 1950"},
- {go:37,n:s=>s.idx[37]/(ref15()[37]||1), f:v=>sgn(Math.round((v-1)*100))+" %",
-  l:"de risque de famine, comparé à une trajectoire 1,5 °C", rel:1},
- {go:40,n:s=>s.idx[40]/(ref15()[40]||1), f:v=>sgn(Math.round((v-1)*100))+" %",
-  l:"de risque de conflit armé, comparé à une trajectoire 1,5 °C", rel:1}
+ {go:37,n:s=>s.idx[37], f:v=>sgn(Math.round((v-1)*100))+" %", l:"de risque de famine", rel:1},
+ {go:40,n:s=>s.idx[40], f:v=>sgn(Math.round((v-1)*100))+" %", l:"de risque de conflit armé", rel:1}
 ];
 let OUTREF=null;
 function drawOut(s){
@@ -1236,16 +1225,16 @@ Object.assign(DYN,{
    `L'humanité reste dans la plage de températures où elle s'est installée depuis 6 000 ans.`);},
  27:s=>{const perte=Math.min(99,50+60*(s.p.dT-1.2));
    return `≈ <b>${Math.round(perte)} % des récifs coralliens</b> perdus. Ils abritent un quart des espèces marines et nourrissent, directement, ≈ 500 millions de personnes.`;},
- 31:s=>`Les glaciers rendent en été l'eau tombée en hiver : <b>≈ 2 milliards de personnes</b> dépendent de ce barrage gratuit, des Andes à l'Himalaya. Ici, la tension sur l'eau douce est ${Math.abs(s.idx[31]-1)<.005?"celle d'aujourd'hui":pct0(s.idx[31]-1)+" par rapport à la trajectoire actuelle"}.`,
+ 31:s=>`Les glaciers rendent en été l'eau tombée en hiver : <b>≈ 2 milliards de personnes</b> dépendent de ce barrage gratuit, des Andes à l'Himalaya. Ici, la tension sur l'eau douce est ${Math.abs(s.idx[31]-1)<.005?"celle d'une trajectoire tenue (+1,7 °C)":pct0(s.idx[31]-1)+" par rapport à une trajectoire tenue (+1,7 °C)"}.`,
  39:s=>`La Banque mondiale attend ≈ 216 millions de déplacés <em>internes</em> d'ici 2050 sur la trajectoire actuelle. On part à 50 km, pas à 5 000 — et les plus pauvres sont ceux qui bougent le moins.`,
  41:s=>`≈ ${fr(s.p.perma*1.6)} Gt de CO₂e s'échappent chaque année des sols dégelés : l'équivalent de ${Math.round(s.p.perma*1.6/.4)} fois les émissions annuelles de la France, sans qu'aucun humain n'y soit pour quelque chose.`
 });
 function qualif(d){const a=Math.abs(d);
-  return a<.005?"identique à la trajectoire actuelle":a<.08?"écart léger":a<.25?"écart net":a<.6?"écart majeur":"changement de régime";}
+  return a<.005?"identique à une trajectoire tenue (+1,7 °C)":a<.08?"écart léger":a<.25?"écart net":a<.6?"écart majeur":"changement de régime";}
 function meaning(id,s){
   const n=byId[id], d=s.idx[id]-1;
   const dyn=DYN[id]?DYN[id](s):
-    `${n.m.charAt(0).toUpperCase()+n.m.slice(1)} : ${Math.abs(d)<.005?"comme sur la trajectoire actuelle":pct0(d)+" — "+qualif(d)}.`;
+    `${n.m.charAt(0).toUpperCase()+n.m.slice(1)} : ${Math.abs(d)<.005?"comme sur une trajectoire tenue (+1,7 °C)":pct0(d)+" — "+qualif(d)}.`;
   return (REPERE[id]?`<p>${REPERE[id]}</p>`:"")+`<p class="dyn">${dyn}</p>`;
 }
 
@@ -1300,7 +1289,7 @@ function refreshSheet(){
   const col=tone(sel,A?cardTxt(n,s).d:d)||"var(--ink)";
   SR.n.textContent=a?a.v:(A?levTxt(sel):sgn(Math.round(d*100))+" %");
   SR.n.style.color=a||!A?col:"var(--ink)";
-  SR.c.textContent=n.m+" · "+(Math.abs(d)<.005?"au niveau de la trajectoire actuelle":sgn(Math.round(d*100))+" % vs trajectoire actuelle");
+  SR.c.textContent=n.m+" · "+(Math.abs(d)<.005?"au niveau d'une trajectoire tenue (+1,7 °C)":sgn(Math.round(d*100))+" % vs trajectoire tenue");
   if(SR.sl){SR.sl.value=levVal(sel);SR.slv.textContent=levTxt(sel);}
   if(SR.mean){SR.mean.innerHTML=meaning(sel,s);
     const v=SR.mean.querySelector("#ville");

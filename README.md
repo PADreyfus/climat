@@ -6,7 +6,7 @@ physique derrière : on déplace une cause — le transport, la déforestation, 
 populations et aux conflits armés.
 
 Dix cartes absentes du jeu officiel ont été ajoutées, dont quatre en permanence
-(pollution de l'air, circulation océanique, ressources halieutiques, coût économique).
+(pollution de l'air, circulation océanique, ressources halieutiques, crise économique).
 
 **Aucune dépendance, aucun build obligatoire, aucun serveur** : une seule page HTML
 autonome, qui s'ouvre au double-clic.
@@ -82,15 +82,15 @@ tempête, récoltes perdues traduites en rations annuelles, population hors de l
 climatique habitable, récifs coralliens perdus, risque de famine et de conflit armé.
 Chaque ligne ouvre la carte correspondante.
 
-Cinq de ces lignes sont des **fonctions absolues du réchauffement** : elles affichent un
-chiffre même sans toucher à rien. Les deux dernières — risque de famine, risque de conflit
-armé — sont des indices ordinaux, donc nuls par construction si on les compare à la
-trajectoire actuelle, qui est la référence. Elles sont donc comparées à **une trajectoire
-1,5 °C** : c'est ce que la trajectoire actuelle coûte déjà, et non zéro.
+**Tout le plateau se compte depuis une trajectoire tenue (+1,7 °C)**, pas depuis la trajectoire
+actuelle. C'est délibéré : prendre la trajectoire actuelle comme référence revenait à la
+comparer à elle-même, et les 52 cartes affichaient 0 % — comme si ne rien faire ne coûtait
+rien. À « Actuel », chaque carte dit maintenant ce que cette trajectoire coûte déjà.
 
-Ces deux pourcentages sont **ordinaux et composés** par les exposants γ le long de la
-chaîne. Ils classent correctement les scénarios entre eux ; ils ne se lisent pas comme des
-multiplicateurs de risque réels.
+Ces pourcentages sont **ordinaux et composés** par les exposants γ le long de la chaîne.
+Ils classent correctement les scénarios entre eux ; ils ne se lisent pas comme des
+multiplicateurs de risque réels. « +280 % de risque de famine » veut dire « bien pire,
+dans l'ordre de ce modèle », pas « 3,8 fois plus de famines ».
 
 Ces chiffres sont des ordres de grandeur issus d'un modèle simplifié — ils servent à
 faire sentir des proportions, pas à être cités.

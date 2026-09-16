@@ -81,26 +81,45 @@ Tous les curseurs au repos, le modèle donne :
 | pH de l'océan | 7,96 | ≈ 8,05 aujourd'hui |
 | Budget 1,5 °C | 6,4 ans | épuisé vers 2031 |
 
-C'est cet état qui sert de **référence** : tous les pourcentages du graphe s'y comparent,
-et il est recalculé au chargement plutôt que codé en dur, pour que l'écart affiché soit
-exactement nul quand on ne touche à rien.
+Cet état est la **trajectoire actuelle**, celle que le simulateur affiche au chargement.
+Ce n'est **pas** la référence des pourcentages.
 
-La référence doit traverser **le même pipeline que l'état affiché** — `refIdx()` rejoue
-`compute()` curseurs au repos, et chaque indice est divisé par le sien. Ce n'est pas un
-détail : sur la trajectoire actuelle (+2,79 °C), quatre seuils de bascule sont déjà
-franchis, et leurs multiplicateurs (récifs ×1,5, calottes ×1,25, glaciers ×1,3)
-s'appliquent à l'état affiché. Tant que la référence était calculée sans eux, l'écart
-n'était pas nul au repos : les cartes annonçaient « +50 % biodiversité marine », « +24 %
-famines », « +12 % conflits armés » **sans qu'on ait touché à quoi que ce soit**. C'étaient
-des artefacts de normalisation, pas des prévisions. Vérification : au repos, les 52 cartes
-affichent exactement 0 %.
+### La référence des pourcentages : une trajectoire tenue (+1,7 °C)
+
+Les indices se comptent depuis `TRAJREF` : le préréglage « Neutralité » **sans captage**,
+qui atterrit à **+1,67 °C**, 3,7 GtCO₂/an nets, 431 ppm. `refIdx()` rejoue `compute()` sur
+ces réglages, et chaque indice affiché est divisé par le sien.
+
+Le captage est retiré délibérément. Avec les 5 Gt/an du préréglage, le CO₂ net tombe à
+zéro, et cinq cartes valent alors exactement 0 — émissions, puits, acidification,
+calcification, ptéropodes. On ne peut pas diviser par elles : deux cartes propagées en aval
+affichaient −100 %. `TRAJREF` est la trajectoire la plus basse que le modèle exprime sans
+dégénérer.
+
+Prendre la trajectoire actuelle comme référence revenait à la comparer à elle-même : les
+52 cartes affichaient 0 %, et ne rien faire semblait ne rien coûter. Depuis une trajectoire
+1,5 °C, « Actuel » dit ce que la trajectoire actuelle coûte déjà — +280 % de risque de
+famine, +170 % de crise économique, et ainsi de suite sur les 52 cartes.
+
+La référence doit traverser **le même pipeline que l'état affiché**. Ce n'est pas un
+détail : sur la trajectoire actuelle (+2,79 °C), quatre seuils de bascule sont franchis et
+leurs multiplicateurs (récifs ×1,5, calottes ×1,25, glaciers ×1,3) s'appliquent à l'état
+affiché. Une référence calculée sans eux produisait un écart non nul là où il devait être
+nul : les cartes ont un temps annoncé « +50 % biodiversité marine » sans qu'on ait touché à
+quoi que ce soit — un artefact de normalisation, pas une prévision.
+
+**Vérification** : réglé sur `TRAJREF`, le plateau affiche exactement 0 % sur les 52 cartes.
+
+Ces pourcentages restent **ordinaux**, et les exposants γ les composent le long de la
+chaîne. Ils classent les scénarios entre eux ; ils ne se lisent pas comme des
+multiplicateurs de risque.
 
 ---
 
 ## 2. La propagation dans le graphe (35 cartes)
 
 « Intensité des sécheresses » n'a pas d'unité. Chaque carte non physique porte donc un
-**indice**, 1 = trajectoire actuelle :
+**indice**, 1 = trajectoire tenue (+1,7 °C) :
 
 ```
 idx(carte) = ( Σ wᵢ · idx(parentᵢ) / Σ wᵢ ) ^ γ
