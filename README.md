@@ -1,34 +1,20 @@
-# Climat — simulateur interactif
+# Climat, Cause à Effet — simulateur interactif
 
-Les 42 cartes de l'atelier, reliées par leurs liens de cause à
-effet, avec un modèle physique derrière : on déplace une cause — le transport, la
-déforestation, la part des énergies fossiles — et l'onde traverse la chaîne jusqu'aux
-famines, aux déplacements de populations et aux conflits armés.
+Les 42 cartes de l'atelier, reliées par leurs liens de cause à effet, avec un modèle
+physique derrière : on déplace une cause — le transport, la déforestation, la part des
+énergies fossiles — et l'onde traverse la chaîne jusqu'aux famines, aux déplacements de
+populations et aux conflits armés.
 
 Dix cartes absentes du jeu officiel ont été ajoutées, dont quatre en permanence
 (pollution de l'air, circulation océanique, ressources halieutiques, coût économique).
 
-**Aucune dépendance, aucun build obligatoire, aucun serveur** : chaque page est un
-fichier HTML autonome qui s'ouvre au double-clic.
+**Aucune dépendance, aucun build obligatoire, aucun serveur** : une seule page HTML
+autonome, qui s'ouvre au double-clic.
 
----
+![](docs/img/cause-effet.png)
 
-## Les éditions
-
-Une troisième page, `cause-effet-essai.html`, est l'édition épurée précédée d'une
-**visite guidée en cinq gestes** : trajectoire actuelle → régler une cause → voir l'onde
-traverser → franchir des seuils → redescendre et constater que les cadenas restent
-fermés. C'est un banc d'essai ; si la visite tient, elle passera dans l'édition normale.
-
-## Les deux éditions principales
-
-| | |
-|---|---|
-| [**Climat, Cause à Effet**](cause-effet.html) — édition épurée | [**Climat**](climat.html) — édition atelier |
-| ![](docs/img/cause-effet.png) | ![](docs/img/climat.png) |
-| Un seul chiffre en grand, les réglages posés sur les cartes elles-mêmes, une fiche qui glisse depuis le bord. Police système, pictogramme par carte, onde de propagation animée. | Six indicateurs en bandeau, huit curseurs visibles en permanence, numéros de cartes conservés pour suivre le jeu physique posé sur la table. |
-
-Les deux partagent exactement le même modèle et les mêmes données : seule la façade change.
+Un seul chiffre en grand, les réglages posés sur les cartes elles-mêmes, une fiche qui
+glisse depuis le bord. Police système, pictogramme par carte, onde de propagation animée.
 
 ## Se déplacer sur le plateau
 
@@ -39,7 +25,7 @@ d'ensemble. Sous 55 % de zoom, les cartes passent en silhouettes colorées.
 ## Démarrer
 
 ```bash
-git clone <url-du-dépôt>
+git clone https://github.com/PADreyfus/climat.git
 cd climat
 open index.html            # macOS — ou double-clic, ou :
 python3 -m http.server     # puis http://localhost:8000
@@ -48,26 +34,23 @@ python3 -m http.server     # puis http://localhost:8000
 ## Structure
 
 ```
-index.html            page d'accueil (choix de l'édition)
-cause-effet.html      édition épurée — page servie, générée
-climat.html           édition atelier — page servie, générée
-src/                  les sources d'édition
+index.html            la page servie — générée, ne pas l'éditer
+src/index.html        la source d'édition
 tools/build.mjs       enveloppe src/*.html dans un document HTML complet
 docs/modele.md        le modèle physique, ses constantes et ses limites
-docs/img/             captures
+docs/img/             capture
 ```
 
-Les fichiers de `src/` sont au format « artifact » : ils commencent directement par
-`<title>` et leur contenu, sans `<html>` ni `<head>`, parce que la plateforme qui les
-héberge ajoute ce squelette à la publication. Pour un hébergement statique ordinaire il
-faut ce squelette — c'est tout ce que fait le script de build.
+Le fichier de `src/` est au format « artifact » : il commence directement par `<title>`
+et son contenu, sans `<html>` ni `<head>`, parce que la plateforme qui l'héberge ajoute
+ce squelette à la publication. Pour un hébergement statique ordinaire il faut ce
+squelette — c'est tout ce que fait le script de build.
 
 ```bash
 node tools/build.mjs     # src/*.html → *.html à la racine
 ```
 
 **On édite `src/`, jamais les fichiers de la racine** : ils sont écrasés à chaque build.
-
 ## Le modèle en trois lignes
 
 Un noyau physique d'une douzaine de cartes, calibré sur le GIEC AR6 et le Global Carbon
@@ -94,7 +77,7 @@ faire sentir des proportions, pas à être cités.
 
 ### Les verrous
 
-L'édition épurée retient le **réchauffement le plus haut atteint** pendant la session.
+Le simulateur retient le **réchauffement le plus haut atteint** pendant la session.
 Quand ce pic franchit le seuil d'un point de bascule — récifs et calottes à 1,5 °C,
 glaciers à 2 °C, Amazonie à 3,5 °C, AMOC à 4 °C — la carte se verrouille et **ne se
 déverrouille plus** : un cadenas apparaît, et l'élément garde un plancher dans le modèle.
