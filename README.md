@@ -28,18 +28,15 @@ lesquelles on agit, et le repère reste visible même dézoomé.
 
 ## Sur téléphone
 
-Sous 860 px, la mise en page change : le chiffre principal passe en barre pleine largeur
-avec la température à gauche et le scénario à droite, les sept conséquences deviennent des
-**pastilles qui défilent horizontalement** au lieu d'une pile de sept lignes, et les outils
-s'alignent sur une rangée au-dessus des scénarios. Le plateau récupère tout le centre.
+Sous 860 px, l'interface se réduit à **une seule barre fine en haut** : la température, puis
+les sept impacts 2100 en pastilles qui défilent horizontalement. Ni scénario, ni budget, ni
+cadenas, ni légende — tout cela reste dans les fiches, à un geste. La barre est bornée à
+**10 % de la hauteur d'écran** (plancher de 58 px, plafond de 92 px), et tout le reste est
+au plateau : environ 90 % de l'écran.
 
-Le bandeau est **borné en hauteur** — `max-height:min(44vh,320px)`, le reste défile à
-l'intérieur. C'est une garantie, pas un réglage : quelles que soient l'orientation et la
-taille de l'écran, il ne peut pas manger la page. En paysage sur téléphone, 44 vh de 390 px
-font 172 px.
-
-Le cadrage d'arrivée diffère aussi : faire tenir les 52 cartes sur 390 px les ferait passer
-en silhouettes, donc on arrive **lisible au début de la chaîne**, sous le bandeau. Le bouton
+Le cadrage d'arrivée diffère aussi : faire tenir les 52 cartes sur 390 px demanderait un
+zoom de 0,28, très en dessous du seuil de 0,55 sous lequel les cartes perdent leur titre.
+On arrive donc **lisible au début de la chaîne** (k = 0,62), juste sous la barre. Le bouton
 ⤢ donne la vue d'ensemble, le pincement zoome, le glissé déplace.
 
 ## Se déplacer sur le plateau

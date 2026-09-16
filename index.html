@@ -207,44 +207,46 @@ svg#board{display:block;width:100%;height:100%}
    Le plateau récupère tout le centre de l'écran.
    ============================================================ */
 @media (max-width:860px){
-  #hero{left:8px;right:8px;width:auto;max-width:none;padding:9px 12px 10px;border-radius:16px;
-    /* garde-fou : quoi qu'il arrive, le bandeau ne mange jamais l'écran.
-       En paysage, 44vh de 390 px fait 172 px ; le reste défile à l'intérieur. */
-    max-height:min(44vh,320px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+  /* ============================================================
+     MOBILE — une seule barre fine : la température, puis les impacts 2100
+     qui défilent horizontalement. Rien d'autre. Tout le reste de l'écran
+     est au plateau.
+     Hauteur bornée à 10 % de l'écran, avec un plancher de 58 px : en dessous
+     la barre ne peut plus rien montrer (un téléphone en paysage fait 390 px
+     de haut, dont 10 % font 39 px).
+     ============================================================ */
+  #hero{left:6px;right:6px;top:calc(6px + env(safe-area-inset-top,0px));
+    width:auto;max-width:none;padding:6px 4px 6px 10px;border-radius:14px;
+    height:10vh;min-height:58px;max-height:92px;
+    display:flex;align-items:center;gap:10px;overflow:hidden}
 
-  /* température à gauche, scénario à droite, budget en dessous */
-  #h-main{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:11px;align-items:center}
-  #hero .t{grid-row:1/span 2;font-size:33px}
-  #hero .u{margin-top:0;font-size:12px}
-  #hero .d2{font-size:11px;margin-top:1px;
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  #hero .b{grid-column:1/-1;margin-top:7px;padding-top:7px;font-size:12px}
-  #h-l{margin-top:7px;padding-top:7px;font-size:12px}
-  #h-out{margin-top:8px;padding-top:8px}
-  #out-h{font-size:12.5px}
+  /* la température, seule */
+  #h-main{flex:0 0 auto;width:auto;display:block;padding:0}
+  #hero .t{font-size:clamp(19px,4.4vh,29px);line-height:1;letter-spacing:-.03em}
+  #hero .u,#hero .d2,#hero .b,#h-l,#out-h,#out-key{display:none}
 
-  /* les sept conséquences en pastilles, plutôt qu'en pile de sept lignes */
-  #out-list{flex-direction:row;gap:7px;margin:8px -12px 0;padding:0 12px 2px;
-    overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;
-    -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  /* la bande d'impacts occupe tout le reste de la barre */
+  #h-out{flex:1 1 auto;min-width:0;margin:0;padding:0;border-top:none;display:flex;align-items:center}
+  #hero.closed #out-list{display:flex}      /* le repli ne s'applique pas ici */
+  #out-list{margin:0;flex:1 1 auto;min-width:0;flex-direction:row;gap:6px;
+    padding:0 6px 0 0;overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   #out-list::-webkit-scrollbar{display:none}
-  .orow{flex-direction:column;align-items:flex-start;gap:1px;flex:0 0 auto;width:138px;
-    margin:0;padding:8px 10px;background:var(--fill);border-radius:11px;scroll-snap-align:start}
-  .orow b{min-width:0;text-align:left;font-size:16px}
-  .orow span{font-size:11px;line-height:1.25}
-  .orow span em{display:none}          /* les sous-titres ne tiennent pas dans une pastille */
+  .orow{flex-direction:column;align-items:flex-start;justify-content:center;gap:0;
+    flex:0 0 auto;width:112px;margin:0;padding:5px 8px;
+    background:var(--fill);border-radius:9px;scroll-snap-align:start}
+  .orow b{min-width:0;text-align:left;font-size:13.5px;line-height:1.15}
+  .orow span{font-size:9.5px;line-height:1.2;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .orow span em{display:none}
 
-  #out-key{margin-top:9px;padding-top:8px;font-size:11px;line-height:1.45}
-  #out-key .okey1,#out-key .okey2,#out-key .lk{display:none}  /* tout est dans la fiche Méthode */
-  #out-key{margin-top:8px;padding-top:7px}
-
-  /* outils sur une rangée, au-dessus des scénarios */
-  #tools{flex-direction:row;right:8px;bottom:calc(60px + env(safe-area-inset-bottom,0px));gap:7px}
+  /* commandes, ramassées en bas */
+  #tools{flex-direction:row;right:8px;bottom:calc(58px + env(safe-area-inset-bottom,0px));gap:7px}
   #scen{left:8px;right:8px;bottom:calc(10px + env(safe-area-inset-bottom,0px));
     overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   #scen::-webkit-scrollbar{display:none}
-  #ver{left:12px;bottom:calc(68px + env(safe-area-inset-bottom,0px));opacity:.3}
-  #hint{top:auto;bottom:calc(104px + env(safe-area-inset-bottom,0px));font-size:11.5px}
+  #ver{left:12px;bottom:calc(66px + env(safe-area-inset-bottom,0px));opacity:.3}
+  #hint{top:auto;bottom:calc(100px + env(safe-area-inset-bottom,0px));font-size:11.5px}
   #sheet{max-height:82vh}
 }
 #sheet:not(.on){opacity:0;pointer-events:none}
@@ -365,7 +367,7 @@ svg .ic{color:var(--ink-3)}
   <div class="t-body"><h3 id="t-h"></h3><p id="t-p"></p></div>
   <div class="t-act"><button id="t-skip">Passer</button><button id="t-next" class="prim">Suivant</button></div>
 </div>
-<div id="ver">v1.3.1</div>
+<div id="ver">v1.4.0</div>
 <div id="hint">Glissez pour vous déplacer · molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
 
 <aside id="sheet" aria-live="polite">
@@ -1543,9 +1545,9 @@ function home(){const r=box();
        passent en silhouettes. On arrive donc lisible au début de la chaîne, sous le
        bandeau ; ⤢ reste là pour la vue d'ensemble. */
     k=.62; tx=10;
-    /* le bandeau est borné par CSS, donc sa hauteur mesurée est déjà plafonnée ;
-       on garde une marge pour que le plateau ne soit jamais réduit à rien */
-    ty=Math.min(hero.height+16,r.height*.46);
+    /* la barre est plafonnée à 92 px par CSS : le plateau commence juste dessous
+       et récupère tout le reste de l'écran */
+    ty=Math.min(hero.height+10,r.height*.18);
   }else{
     k=clamp((r.height-24)/980,.55,1.05);
     tx=hero.width+26;                      /* le plateau démarre à droite du bandeau */
