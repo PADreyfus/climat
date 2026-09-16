@@ -153,6 +153,10 @@ svg#board{display:block;width:100%;height:100%}
 #tour button{font-size:13px;font-weight:600;padding:7px 14px;border-radius:99px;cursor:pointer;color:var(--ink-2);pointer-events:auto}
 #tour button.prim{background:var(--accent);color:#fff}
 @media (max-width:640px){#tour{flex-wrap:wrap}#tour .t-act{width:100%;justify-content:flex-end;margin-top:4px}}
+#ver{position:fixed;left:14px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:2;
+  font-size:10.5px;letter-spacing:.02em;color:var(--ink-3);opacity:.45;pointer-events:none;
+  font-variant-numeric:tabular-nums;user-select:none}
+@media (max-width:860px){#ver{bottom:calc(60px + env(safe-area-inset-bottom,0px));opacity:.35}}
 #hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:3;
   font-size:12.5px;color:var(--ink-3);transition:opacity .9s;pointer-events:none;text-align:center;padding:0 16px}
 
@@ -296,6 +300,7 @@ svg .ic{color:var(--ink-3)}
   <div class="t-body"><h3 id="t-h"></h3><p id="t-p"></p></div>
   <div class="t-act"><button id="t-skip">Passer</button><button id="t-next" class="prim">Suivant</button></div>
 </div>
+<div id="ver">v1.1.0</div>
 <div id="hint">Glissez pour vous déplacer · molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
 
 <aside id="sheet" aria-live="polite">
@@ -854,6 +859,22 @@ function refIdx(){
   }
   return REFIDX[k];
 }
+/* Seconde référence : une trajectoire qui tient ~1,5 °C (le préréglage « Neutralité »).
+   Famine et conflit armé sont des indices ordinaux : rapportés à la trajectoire actuelle
+   ils valent 0 % au repos, ce qui laisse croire que ne rien faire ne coûte rien. Rapportés
+   à un monde à 1,5 °C, ils disent ce que la trajectoire actuelle coûte déjà. */
+const REF15={};
+function ref15(){
+  const k=showOpt?"opt":"base";
+  if(!REF15[k]){
+    const save={...S};
+    Object.assign(S,{ind:40,bat:30,tra:30,agr:65,def:10,low:85,sink:130,ccs:5});
+    const raw=compute().idx, base=refIdx();
+    REF15[k]={}; for(const j in raw) REF15[k][j]=raw[j]/(base[j]||1);
+    Object.assign(S,save);
+  }
+  return REF15[k];
+}
 function snap(){
   const r=compute(), ref=refIdx(), idx={};
   for(const k in r.idx) idx[k]=r.idx[k]/(ref[k]||1);
@@ -1148,8 +1169,10 @@ const IMPACT=[
  {go:36,n:s=>niche(s.p.dT), f:v=>v<60?"< 100 M":md(v), l:"de personnes hors de la zone climatique habitable"},
  {go:27,n:s=>recifs(s.p.dT), f:v=>Math.round(v)+" %", l:"des récifs coralliens perdus",
   sub:s=>"la moitié a déjà disparu depuis 1950"},
- {go:37,n:s=>s.idx[37], f:v=>sgn(Math.round((v-1)*100))+" %", l:"de risque de famine", rel:1},
- {go:40,n:s=>s.idx[40], f:v=>sgn(Math.round((v-1)*100))+" %", l:"de risque de conflit armé", rel:1}
+ {go:37,n:s=>s.idx[37]/(ref15()[37]||1), f:v=>sgn(Math.round((v-1)*100))+" %",
+  l:"de risque de famine, comparé à une trajectoire 1,5 °C", rel:1},
+ {go:40,n:s=>s.idx[40]/(ref15()[40]||1), f:v=>sgn(Math.round((v-1)*100))+" %",
+  l:"de risque de conflit armé, comparé à une trajectoire 1,5 °C", rel:1}
 ];
 let OUTREF=null;
 function drawOut(s){

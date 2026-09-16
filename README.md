@@ -82,6 +82,16 @@ tempête, récoltes perdues traduites en rations annuelles, population hors de l
 climatique habitable, récifs coralliens perdus, risque de famine et de conflit armé.
 Chaque ligne ouvre la carte correspondante.
 
+Cinq de ces lignes sont des **fonctions absolues du réchauffement** : elles affichent un
+chiffre même sans toucher à rien. Les deux dernières — risque de famine, risque de conflit
+armé — sont des indices ordinaux, donc nuls par construction si on les compare à la
+trajectoire actuelle, qui est la référence. Elles sont donc comparées à **une trajectoire
+1,5 °C** : c'est ce que la trajectoire actuelle coûte déjà, et non zéro.
+
+Ces deux pourcentages sont **ordinaux et composés** par les exposants γ le long de la
+chaîne. Ils classent correctement les scénarios entre eux ; ils ne se lisent pas comme des
+multiplicateurs de risque réels.
+
 Ces chiffres sont des ordres de grandeur issus d'un modèle simplifié — ils servent à
 faire sentir des proportions, pas à être cités.
 
