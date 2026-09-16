@@ -16,6 +16,16 @@ autonome, qui s'ouvre au double-clic.
 Un seul chiffre en grand, les réglages posés sur les cartes elles-mêmes, une fiche qui
 glisse depuis le bord. Police système, pictogramme par carte, onde de propagation animée.
 
+## La visite guidée
+
+À la première venue, une **visite en cinq gestes** se lance seule : trajectoire actuelle →
+régler une cause → voir l'onde traverser → franchir des seuils → redescendre et constater
+que les cadenas restent fermés. Elle ne se relance pas toute seule ensuite ; le bouton
+**?** la rejoue à tout moment.
+
+Les huit cartes réglables portent un **trait bleu dans le coin** : ce sont les seules sur
+lesquelles on agit, et le repère reste visible même dézoomé.
+
 ## Se déplacer sur le plateau
 
 Glisser pour se déplacer, molette ou pincement pour zoomer — le zoom suit l'amplitude
