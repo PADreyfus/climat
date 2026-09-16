@@ -28,11 +28,14 @@ lesquelles on agit, et le repère reste visible même dézoomé.
 
 ## Sur téléphone
 
-Sous 860 px, l'interface se réduit à **une seule barre fine en haut** : la température, puis
-les sept impacts 2100 en pastilles qui défilent horizontalement. Ni scénario, ni budget, ni
-cadenas, ni légende — tout cela reste dans les fiches, à un geste. La barre est bornée à
-**10 % de la hauteur d'écran** (plancher de 58 px, plafond de 92 px), et tout le reste est
-au plateau : environ 90 % de l'écran.
+Sous 860 px, l'interface se réduit à **une seule barre fine en haut** : la température sur
+sa ligne, et **juste en dessous** les sept dégâts de 2100 en pastilles qui défilent
+horizontalement. Ni scénario, ni budget, ni cadenas, ni légende — tout cela reste dans les
+fiches, à un geste.
+
+La barre fait **10 % de la hauteur d'écran** (plancher 62 px, plafond 94 px), et son contenu
+est dimensionné en `vh` : il rétrécit avec elle au lieu d'être coupé. Tout le reste est au
+plateau — environ 90 % de l'écran.
 
 Le cadrage d'arrivée diffère aussi : faire tenir les 52 cartes sur 390 px demanderait un
 zoom de 0,28, très en dessous du seuil de 0,55 sous lequel les cartes perdent leur titre.

@@ -199,27 +199,31 @@ svg#board{display:block;width:100%;height:100%}
      de haut, dont 10 % font 39 px).
      ============================================================ */
   #hero{left:6px;right:6px;top:calc(6px + env(safe-area-inset-top,0px));
-    width:auto;max-width:none;padding:6px 4px 6px 10px;border-radius:14px;
-    height:10vh;min-height:58px;max-height:92px;
-    display:flex;align-items:center;gap:10px;overflow:hidden}
+    width:auto;max-width:none;padding:4px 4px 5px 9px;border-radius:14px;
+    /* 10 % de l'écran. Le contenu est dimensionné en vh pour rétrécir avec la barre
+       plutôt que d'être coupé : sur un écran de 667 px, 10 % ne font que 67 px. */
+    height:10vh;min-height:62px;max-height:94px;
+    display:flex;flex-direction:column;gap:2px;overflow:hidden}
 
-  /* la température, seule */
+  /* la température, seule, sur sa ligne */
   #h-main{flex:0 0 auto;width:auto;display:block;padding:0}
-  #hero .t{font-size:clamp(19px,4.4vh,29px);line-height:1;letter-spacing:-.03em}
+  #hero .t{font-size:clamp(14px,2.4vh,20px);line-height:1.1;letter-spacing:-.03em}
   #hero .u,#hero .d2,#hero .b,#h-l,#out-h,#out-key{display:none}
 
   /* la bande d'impacts occupe tout le reste de la barre */
-  #h-out{flex:1 1 auto;min-width:0;margin:0;padding:0;border-top:none;display:flex;align-items:center}
+  /* les dégâts, juste en dessous, sur toute la largeur */
+  #h-out{flex:1 1 auto;min-height:0;min-width:0;margin:0;padding:0;border-top:none;
+    display:flex;align-items:stretch}
   #hero.closed #out-list{display:flex}      /* le repli ne s'applique pas ici */
   #out-list{margin:0;flex:1 1 auto;min-width:0;flex-direction:row;gap:6px;
     padding:0 6px 0 0;overflow-x:auto;overscroll-behavior-x:contain;
     scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   #out-list::-webkit-scrollbar{display:none}
   .orow{flex-direction:column;align-items:flex-start;justify-content:center;gap:0;
-    flex:0 0 auto;width:112px;margin:0;padding:5px 8px;
-    background:var(--fill);border-radius:9px;scroll-snap-align:start}
-  .orow b{min-width:0;text-align:left;font-size:13.5px;line-height:1.15}
-  .orow span{font-size:9.5px;line-height:1.2;
+    flex:0 0 auto;width:104px;margin:0;padding:2px 7px;
+    background:var(--fill);border-radius:8px;scroll-snap-align:start}
+  .orow b{min-width:0;text-align:left;font-size:clamp(10.5px,1.5vh,12px);line-height:1.1}
+  .orow span{font-size:clamp(8px,1.15vh,9.5px);line-height:1.15;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   .orow span em{display:none}
 
@@ -350,7 +354,7 @@ svg .ic{color:var(--ink-3)}
   <div class="t-body"><h3 id="t-h"></h3><p id="t-p"></p></div>
   <div class="t-act"><button id="t-skip">Passer</button><button id="t-next" class="prim">Suivant</button></div>
 </div>
-<div id="ver">v1.4.0</div>
+<div id="ver">v1.4.1</div>
 <div id="hint">Glissez pour vous déplacer · molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
 
 <aside id="sheet" aria-live="polite">
