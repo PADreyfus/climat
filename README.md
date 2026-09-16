@@ -26,6 +26,17 @@ que les cadenas restent fermés. Elle ne se relance pas toute seule ensuite ; le
 Les huit cartes réglables portent un **trait bleu dans le coin** : ce sont les seules sur
 lesquelles on agit, et le repère reste visible même dézoomé.
 
+## Sur téléphone
+
+Sous 640 px, la mise en page change : le chiffre principal passe en barre pleine largeur
+avec la température à gauche et le scénario à droite, les sept conséquences deviennent des
+**pastilles qui défilent horizontalement** au lieu d'une pile de sept lignes, et les outils
+s'alignent sur une rangée au-dessus des scénarios. Le plateau récupère tout le centre.
+
+Le cadrage d'arrivée diffère aussi : faire tenir les 52 cartes sur 390 px les ferait passer
+en silhouettes, donc on arrive **lisible au début de la chaîne**, sous le bandeau. Le bouton
+⤢ donne la vue d'ensemble, le pincement zoome, le glissé déplace.
+
 ## Se déplacer sur le plateau
 
 Glisser pour se déplacer, molette ou pincement pour zoomer — le zoom suit l'amplitude

@@ -182,6 +182,50 @@ svg#board{display:block;width:100%;height:100%}
   #sheet.on{transform:none}
   #hero .t{font-size:38px}
 }
+
+/* ============================================================
+   TÉLÉPHONE — le bandeau prenait 310 px de large sur 390, par-dessus le plateau.
+   Il devient une barre pleine largeur, compacte ; les conséquences passent en
+   pastilles qui défilent horizontalement ; les outils s'alignent sur une rangée.
+   Le plateau récupère tout le centre de l'écran.
+   ============================================================ */
+@media (max-width:640px){
+  #hero{left:8px;right:8px;width:auto;max-width:none;padding:9px 12px 10px;border-radius:16px}
+
+  /* température à gauche, scénario à droite, budget en dessous */
+  #h-main{display:grid;grid-template-columns:auto minmax(0,1fr);column-gap:11px;align-items:center}
+  #hero .t{grid-row:1/span 2;font-size:33px}
+  #hero .u{margin-top:0;font-size:12px}
+  #hero .d2{font-size:11px;margin-top:1px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  #hero .b{grid-column:1/-1;margin-top:7px;padding-top:7px;font-size:12px}
+  #h-l{margin-top:7px;padding-top:7px;font-size:12px}
+  #h-out{margin-top:8px;padding-top:8px}
+  #out-h{font-size:12.5px}
+
+  /* les sept conséquences en pastilles, plutôt qu'en pile de sept lignes */
+  #out-list{flex-direction:row;gap:7px;margin:8px -12px 0;padding:0 12px 2px;
+    overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;
+    -webkit-overflow-scrolling:touch;scrollbar-width:none}
+  #out-list::-webkit-scrollbar{display:none}
+  .orow{flex-direction:column;align-items:flex-start;gap:1px;flex:0 0 auto;width:138px;
+    margin:0;padding:8px 10px;background:var(--fill);border-radius:11px;scroll-snap-align:start}
+  .orow b{min-width:0;text-align:left;font-size:16px}
+  .orow span{font-size:11px;line-height:1.25}
+  .orow span em{display:none}          /* les sous-titres ne tiennent pas dans une pastille */
+
+  #out-key{margin-top:9px;padding-top:8px;font-size:11px;line-height:1.45}
+  #out-key .okey2,#out-key .lk{display:none}   /* le code couleur reste dans la fiche Méthode */
+
+  /* outils sur une rangée, au-dessus des scénarios */
+  #tools{flex-direction:row;right:8px;bottom:calc(60px + env(safe-area-inset-bottom,0px));gap:7px}
+  #scen{left:8px;right:8px;bottom:calc(10px + env(safe-area-inset-bottom,0px));
+    overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  #scen::-webkit-scrollbar{display:none}
+  #ver{left:12px;bottom:calc(68px + env(safe-area-inset-bottom,0px));opacity:.3}
+  #hint{top:auto;bottom:calc(104px + env(safe-area-inset-bottom,0px));font-size:11.5px}
+  #sheet{max-height:82vh}
+}
 #sheet:not(.on){opacity:0;pointer-events:none}
 #grab{width:38px;height:5px;border-radius:3px;background:var(--fill);margin:8px auto 0;flex:none}
 .sc{overflow-y:auto;overscroll-behavior:contain;padding:14px 16px calc(20px + env(safe-area-inset-bottom,0px))}
@@ -278,7 +322,7 @@ svg .ic{color:var(--ink-3)}
   <div id="h-out">
     <button id="out-h" aria-expanded="true">Ce que ça coûte en 2100<span class="chev">⌃</span></button>
     <div id="out-list"></div>
-    <p id="out-key">Tous les % du plateau se comptent <b>depuis une trajectoire tenue (+1,7 °C)</b> : à « Actuel », ils disent ce que la trajectoire actuelle coûte déjà. <b class="w">Rouges</b> : pire qu'au chargement · <b class="c">bleus</b> : mieux.
+    <p id="out-key">Tous les % du plateau se comptent <b>depuis une trajectoire tenue (+1,7 °C)</b> : à « Actuel », ils disent ce que la trajectoire actuelle coûte déjà. <span class="okey2"><b class="w">Rouges</b> : pire qu'au chargement · <b class="c">bleus</b> : mieux.</span>
       <span class="lk"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><use href="#ic-lock"/></svg> seuil de bascule franchi à cette température.</span>
       <button id="src-b">Sources et méthode ›</button></p>
   </div>
@@ -300,7 +344,7 @@ svg .ic{color:var(--ink-3)}
   <div class="t-body"><h3 id="t-h"></h3><p id="t-p"></p></div>
   <div class="t-act"><button id="t-skip">Passer</button><button id="t-next" class="prim">Suivant</button></div>
 </div>
-<div id="ver">v1.2.0</div>
+<div id="ver">v1.3.0</div>
 <div id="hint">Glissez pour vous déplacer · molette pour zoomer · survolez une carte, cliquez pour la fiche</div>
 
 <aside id="sheet" aria-live="polite">
@@ -1469,10 +1513,20 @@ const T=()=>{gW.setAttribute("transform",`translate(${tx},${ty}) scale(${k})`);
   const nf=k<.55; if(nf!==far){far=nf;setFar();}};
 const box=()=>{const r=stage.getBoundingClientRect();
   board.setAttribute("viewBox",`0 0 ${r.width} ${r.height}`);return r;};
-function home(){const r=box();k=clamp((r.height-24)/980,.55,1.05);
+function home(){const r=box();
   const hero=$("hero").getBoundingClientRect();
-  tx=r.width>860?hero.width+26:-20*k;      /* le plateau démarre à droite du bandeau */
-  ty=-14*k;T(); if(sel!=null)ensureVisible(sel);}
+  const phone=r.width<=640, wide=r.width>860;
+  if(phone){
+    /* Tout faire tenir sur 390 px rendrait les 52 cartes illisibles — sous 0,55 elles
+       passent en silhouettes. On arrive donc lisible au début de la chaîne, sous le
+       bandeau ; ⤢ reste là pour la vue d'ensemble. */
+    k=.62; tx=10; ty=hero.height+16;
+  }else{
+    k=clamp((r.height-24)/980,.55,1.05);
+    tx=wide?hero.width+26:-20*k;           /* le plateau démarre à droite du bandeau */
+    ty=-14*k;
+  }
+  T(); if(sel!=null)ensureVisible(sel);}
 function fit(){const r=box();k=Math.min(r.width/VW,r.height/VH)*.95;
   tx=(r.width-VW*k)/2;ty=(r.height-VH*k)/2;T();}
 function ensureVisible(id){
