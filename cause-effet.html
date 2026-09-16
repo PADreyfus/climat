@@ -52,7 +52,9 @@ button{font:inherit;color:inherit;border:0;background:none;padding:0;cursor:poin
   box-shadow:0 0 0 .5px var(--hair), 0 6px 26px -14px rgba(0,0,0,.5)}
 
 /* ---------- plan de travail ---------- */
-#stage{position:fixed;inset:0;touch-action:none;cursor:grab;background:var(--bg)}
+#stage{position:fixed;inset:0;touch-action:none;cursor:grab;background:var(--bg);
+  user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+svg#board{-webkit-user-drag:none}
 #stage.drag{cursor:grabbing}
 svg#board{display:block;width:100%;height:100%}
 
@@ -1351,34 +1353,44 @@ function ensureVisible(id){
 function zoom(f,cx,cy){const r=stage.getBoundingClientRect();
   cx=cx??r.width/2;cy=cy??r.height/2;
   const nk=clamp(k*f,.14,2.6);tx=cx-(cx-tx)*nk/k;ty=cy-(cy-ty)*nk/k;k=nk;T();}
-const pts=new Map(); let g0=null,moved=0,captured=false;
-const grab=e=>{ if(captured)return;
-  try{stage.setPointerCapture(e.pointerId);}catch(_){}
-  captured=true; stage.classList.add("drag"); };
-stage.addEventListener("pointerdown",e=>{
-  pts.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;
-  if(pts.size===2){const[a,b]=[...pts.values()];
-    g0={d:Math.hypot(a.x-b.x,a.y-b.y),k}; grab(e);}
-});
-stage.addEventListener("pointermove",e=>{
-  const p=pts.get(e.pointerId); if(!p)return;
-  const dx=e.clientX-p.x,dy=e.clientY-p.y;
-  if(pts.size===2&&g0){const[a,b]=[...pts.values()];
-    p.x=e.clientX;p.y=e.clientY;
+const pts=new Map(); let g0=null,moved=0,dragging=false,downT=null;
+function onDown(e){
+  if(e.button>0) return;                       /* bouton gauche ou tactile seulement */
+  pts.set(e.pointerId,{x:e.clientX,y:e.clientY}); moved=0; downT=e.target;
+  if(pts.size===2){const[a,b]=[...pts.values()]; g0={d:Math.hypot(a.x-b.x,a.y-b.y),k};}
+}
+function onMove(e){
+  const p=pts.get(e.pointerId); if(!p) return;
+  const dx=e.clientX-p.x, dy=e.clientY-p.y;
+  if(pts.size===2&&g0){                        /* deux doigts : pincement */
+    const[a,b]=[...pts.values()]; p.x=e.clientX; p.y=e.clientY;
     const d=Math.hypot(a.x-b.x,a.y-b.y);
     if(d>10){const r=stage.getBoundingClientRect();
-      zoom((d/g0.d)*(g0.k/k),(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top);g0.d=d;g0.k=k;}
-    return;}
+      zoom((d/g0.d)*(g0.k/k),(a.x+b.x)/2-r.left,(a.y+b.y)/2-r.top); g0.d=d; g0.k=k;}
+    return;
+  }
   moved+=Math.abs(dx)+Math.abs(dy);
-  if(moved<5)return;                       /* sous ce seuil, c'est un clic, pas un glissé */
-  grab(e);
-  tx+=dx;ty+=dy;p.x=e.clientX;p.y=e.clientY;T();
-});
-["pointerup","pointercancel"].forEach(t=>stage.addEventListener(t,e=>{
-  pts.delete(e.pointerId); if(pts.size<2)g0=null;
-  if(!pts.size){stage.classList.remove("drag");captured=false;
-    if(moved<5&&(e.target===stage||e.target===board||e.target.id==="world"))close();}
-}));
+  if(moved<4) return;                          /* sous ce seuil, c'est un clic */
+  if(!dragging){dragging=true; stage.classList.add("drag");
+    getSelection&&getSelection().removeAllRanges&&getSelection().removeAllRanges();}
+  tx+=dx; ty+=dy; p.x=e.clientX; p.y=e.clientY; T();
+}
+function onUp(e){
+  if(!pts.has(e.pointerId)) return;
+  pts.delete(e.pointerId); if(pts.size<2) g0=null;
+  if(pts.size) return;
+  stage.classList.remove("drag");
+  const t=downT; downT=null;
+  if(!dragging && (t===stage||t===board||t&&t.id==="world")) close();
+  dragging=false;
+}
+/* le suivi est posé sur la fenêtre : le déplacement continue même si le pointeur
+   passe sur le bandeau, la fiche ou hors du cadre, et le clic des cartes reste intact */
+stage.addEventListener("pointerdown",onDown);
+addEventListener("pointermove",onMove,{passive:true});
+addEventListener("pointerup",onUp);
+addEventListener("pointercancel",onUp);
+addEventListener("blur",()=>{pts.clear();g0=null;dragging=false;stage.classList.remove("drag");});
 stage.addEventListener("wheel",e=>{e.preventDefault();
   const r=stage.getBoundingClientRect();
   const d=e.deltaMode===1?e.deltaY*16:e.deltaY;      /* lignes ou pixels selon le périphérique */

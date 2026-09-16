@@ -86,7 +86,7 @@ button{font:inherit;color:inherit}
 .rail,.detail{background:var(--surface);overflow-y:auto;overflow-x:hidden}
 .rail{border-right:1px solid var(--line)}
 .detail{border-left:1px solid var(--line)}
-.stage{position:relative;background:
+.stage{user-select:none;-webkit-user-select:none;position:relative;background:
   radial-gradient(circle at 18% 22%, var(--paper-grain) 0 1.5px, transparent 1.6px) 0 0/22px 22px,
   radial-gradient(circle at 70% 65%, var(--paper-grain) 0 1.5px, transparent 1.6px) 7px 11px/29px 29px,
   var(--paper);
@@ -912,10 +912,23 @@ function zoom(f,cx,cy){
   const nk=Math.max(.12,Math.min(3,k*f));
   tx=cx-(cx-tx)*nk/k; ty=cy-(cy-ty)*nk/k; k=nk; applyT();
 }
-let drag=null;
-stage.addEventListener("pointerdown",e=>{if(e.target.closest&&e.target.closest(".zoomctl"))return;drag={x:e.clientX,y:e.clientY,tx,ty};stage.setPointerCapture(e.pointerId);stage.classList.add("dragging");});
-stage.addEventListener("pointermove",e=>{if(!drag)return;tx=drag.tx+(e.clientX-drag.x);ty=drag.ty+(e.clientY-drag.y);applyT();});
-["pointerup","pointercancel"].forEach(t=>stage.addEventListener(t,()=>{drag=null;stage.classList.remove("dragging");}));
+let drag=null, moved=0;
+/* suivi posé sur la fenêtre : le glissé continue partout, et la capture du
+   pointeur ne vole plus le clic destiné aux cartes ni aux boutons */
+stage.addEventListener("pointerdown",e=>{
+  if(e.button>0) return;
+  if(e.target.closest&&e.target.closest(".zoomctl")) return;
+  drag={x:e.clientX,y:e.clientY,tx,ty}; moved=0;
+});
+addEventListener("pointermove",e=>{
+  if(!drag) return;
+  moved+=Math.abs(e.clientX-drag.x)+Math.abs(e.clientY-drag.y);
+  if(moved<4) return;
+  stage.classList.add("dragging");
+  tx=drag.tx+(e.clientX-drag.x); ty=drag.ty+(e.clientY-drag.y); applyT();
+});
+["pointerup","pointercancel"].forEach(t=>addEventListener(t,()=>{drag=null;moved=0;stage.classList.remove("dragging");}));
+addEventListener("blur",()=>{drag=null;stage.classList.remove("dragging");});
 stage.addEventListener("wheel",e=>{e.preventDefault();
   const r=stage.getBoundingClientRect();
   const d=e.deltaMode===1?e.deltaY*16:e.deltaY;      /* lignes ou pixels selon le périphérique */
