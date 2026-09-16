@@ -125,17 +125,17 @@ franchit un seuil, l'élément se verrouille, et il ne se déverrouille plus.
 
 | Verrou | Seuil | Effet persistant dans le modèle |
 |---|---|---|
-| Récifs coralliens | 1,5 °C | plancher d'indice 1,5 sur la biodiversité marine |
-| Calottes polaires | 1,5 °C | plancher 1,25 — l'essentiel de l'engagement est post-2100 |
+| Récifs coralliens | 1,5 °C | × 1,5 sur la biodiversité marine, en permanence |
+| Calottes polaires | 1,5 °C | × 1,25 — l'essentiel de l'engagement est post-2100 |
 | Permafrost | 1,5 °C | plancher de 0,9 GtCO₂e/an, quelle que soit la température ensuite |
-| Glaciers de montagne | 2,0 °C | plancher d'indice 1,3 |
+| Glaciers de montagne | 2,0 °C | × 1,3 |
 | Forêt amazonienne | 3,5 °C | plancher de 0,6 GtCO₂/an |
-| Circulation atlantique | 4,0 °C | plancher d'indice 1,6 |
+| Circulation atlantique | 4,0 °C | × 1,6 |
 
 Seuils : valeur centrale d'Armstrong McKay *et al.*, *Science*, 2022. **Les fourchettes
-sont larges** — 0,8 à 3 °C pour le Groenland, 1,4 à 8 °C pour l'AMOC. Les planchers, eux,
-sont des choix d'auteur : ils traduisent « on ne redescend plus en dessous », pas une
-amplitude mesurée.
+sont larges** — 0,8 à 3 °C pour le Groenland, 1,4 à 8 °C pour l'AMOC. Les multiplicateurs, eux,
+sont des choix d'auteur : ils traduisent « cet élément reste durablement aggravé », pas
+une amplitude mesurée.
 
 La mémoire ne court que sur vos propres réglages : poussez un curseur au maximum puis
 ramenez-le, les seuils franchis au passage restent fermés — ce qui a été cassé ne se
