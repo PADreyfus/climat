@@ -52,29 +52,29 @@ svg#board{display:block;width:100%;height:100%}
 #h-main:active{transform:scale(.99)}
 #h-l{display:flex;align-items:center;gap:7px;margin-top:10px;padding-top:9px;border-top:.5px solid var(--hair);
   font-size:12.5px;color:var(--ink-3);cursor:pointer}
-#h-l.on{color:var(--warm)} #h-l b{font-weight:650}
+#h-l.on{color:var(--ink-2)} #h-l b{font-weight:650}
 #h-l svg{flex:none}
 #toast{position:fixed;top:calc(74px + env(safe-area-inset-top,0px));left:50%;transform:translate(-50%,-14px);z-index:7;
   display:flex;gap:10px;align-items:flex-start;max-width:min(430px,calc(100vw - 28px));padding:12px 15px;border-radius:15px;
   background:var(--ctl);-webkit-backdrop-filter:blur(28px) saturate(180%);backdrop-filter:blur(28px) saturate(180%);
   box-shadow:0 0 0 .5px var(--hair),0 14px 40px -18px rgba(0,0,0,.55);
-  opacity:0;pointer-events:none;transition:opacity .3s,transform .42s var(--ease);color:var(--warm)}
+  opacity:0;pointer-events:none;transition:opacity .3s,transform .42s var(--ease);color:var(--ink-2)}
 #toast.on{opacity:1;transform:translate(-50%,0)}
-#toast b{display:block;font-size:13.5px;font-weight:650}
+#toast b{display:block;font-size:13.5px;font-weight:650;color:var(--ink)}
 #toast em{display:block;font-style:normal;font-size:12.5px;line-height:1.4;color:var(--ink-2);margin-top:2px}
 #toast svg{margin-top:1px;flex:none}
-.card .lk{color:var(--warm)}
-.card.locked rect.bg{stroke:var(--warm);stroke-width:1;stroke-dasharray:none}
+.card .lk{color:var(--ink-2)}
+.card.locked rect.bg{stroke:var(--ink-3);stroke-width:1;stroke-dasharray:none}
 @keyframes flash{0%{opacity:1}22%{opacity:.25}46%{opacity:1}70%{opacity:.35}100%{opacity:1}}
 .card.flash{animation:flash .9s ease-out}
 .lockrow{display:flex;gap:11px;align-items:flex-start;padding:12px 14px;position:relative}
 .lockrow+.lockrow::before{content:"";position:absolute;left:14px;right:0;top:0;height:1px;background:var(--hair);transform:scaleY(.5)}
 .lockrow .s{font-size:12.5px;font-weight:650;flex:none;width:60px;white-space:nowrap;color:var(--ink-3)}
-.lockrow.hot .s{color:var(--warm)}
+.lockrow.hot .s{color:var(--ink)}
 .lockrow .t{font-size:14px;font-weight:600}
 .lockrow .t em{display:block;font-style:normal;font-weight:400;font-size:12.5px;color:var(--ink-3);margin-top:2px;line-height:1.4}
 .lockrow .st{margin-left:auto;flex:none;color:var(--ink-3)}
-.lockrow.hot .st{color:var(--warm)}
+.lockrow.hot .st{color:var(--ink-2)}
 #h-out{margin-top:11px;padding-top:10px;border-top:.5px solid var(--hair)}
 #out-h{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:650;letter-spacing:.07em;
   text-transform:uppercase;color:var(--ink-3);cursor:pointer;width:100%}
@@ -88,6 +88,11 @@ svg#board{display:block;width:100%;height:100%}
 .orow b{font-size:15px;font-weight:650;letter-spacing:-.01em;flex:none;min-width:78px;text-align:right}
 .orow span{font-size:12px;color:var(--ink-2);line-height:1.3}
 .orow span em{display:block;font-style:normal;font-size:11.5px;color:var(--ink-3);margin-top:1px}
+#out-key{margin:11px 0 0;padding-top:9px;border-top:.5px solid var(--hair);font-size:11.5px;
+  line-height:1.5;color:var(--ink-3)}
+#out-key b{font-weight:650} #out-key b.w{color:var(--warm)} #out-key b.c{color:var(--cool)}
+#out-key .lk{display:inline-flex;align-items:center;gap:4px;color:var(--ink-2)}
+#out-key svg{vertical-align:-1px}
 #hero .chip{display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;
   background:var(--fill);margin-left:7px;vertical-align:3px}
 
@@ -214,6 +219,8 @@ svg .ic{color:var(--ink-3)}
   <div id="h-out">
     <button id="out-h" aria-expanded="true">Ce que ça coûte en 2100<span class="chev">⌃</span></button>
     <div id="out-list"></div>
+    <p id="out-key">Chiffres <b class="w">rouges</b> : pire que la trajectoire actuelle · <b class="c">bleus</b> : mieux.
+      <span class="lk"><svg viewBox="0 0 24 24" width="12" height="12" aria-hidden="true"><use href="#ic-lock"/></svg> seuil franchi, sans retour possible.</span></p>
   </div>
 </div>
 
@@ -268,7 +275,7 @@ const NODES = [
 {id:18,f:"phy",L:9,R:5,n:"Fonte de la banquise",m:"perte de banquise",d:"La banquise arctique d'été a perdu ≈ 40 % de sa surface depuis 1979. Elle flotte : sa fonte n'élève pas le niveau marin, mais elle remplace un miroir blanc par un océan sombre."},
 {id:16,f:"phy",L:9,R:6,n:"Fonte des glaciers",m:"perte des glaciers",d:"Les glaciers de montagne perdent ≈ 270 Gt/an. Châteaux d'eau des Andes, de l'Himalaya et des Alpes, ils régulent le débit d'été de fleuves qui alimentent des milliards de personnes."},
 {id:19,f:"phy",L:9,R:7,n:"Fonte des calottes glaciaires",m:"perte des calottes",d:"Groenland : +7 m de niveau marin potentiel. Antarctique : +54 m. Elles fondent lentement mais leur engagement se joue à quelques dixièmes de degré près."},
-{id:41,f:"phy",L:10,R:0,n:"Permafrost",m:"dégel du permafrost",d:"Les sols gelés du Grand Nord stockent ≈ 1500 GtC, soit le double du carbone de l'atmosphère. En dégelant, ils relâchent CO₂ et méthane : une rétroaction qui s'auto-entretient."},
+{id:41,f:"phy",L:10,R:0,vf:s=>fr(s.p.perma*1.6)+" Gt/an",n:"Permafrost",m:"dégel du permafrost",d:"Les sols gelés du Grand Nord stockent ≈ 1500 GtC, soit le double du carbone de l'atmosphère. En dégelant, ils relâchent CO₂ et méthane : une rétroaction qui s'auto-entretient."},
 {id:36,f:"phy",L:10,R:1,n:"Canicules",m:"intensité des canicules",d:"L'événement climatique le plus directement lié au réchauffement moyen : un décalage de la courbe de +1 °C multiplie par 5 à 10 la fréquence des extrêmes chauds.",g:2.2},
 {id:28,f:"eco",L:10,R:2,n:"Vecteurs de maladie",m:"extension des vecteurs",d:"Moustiques (dengue, paludisme, chikungunya), tiques : la température conditionne leur aire de répartition et la vitesse de réplication des virus qu'ils portent."},
 {id:20,f:"phy",L:10,R:3,n:"Perturbation du cycle de l'eau",m:"intensité du cycle de l'eau",d:"+7 % de vapeur d'eau dans l'air par degré (Clausius-Clapeyron). L'atmosphère assèche plus vite là où il ne pleut pas, et déverse plus fort là où il pleut.",g:1.2},
@@ -575,7 +582,7 @@ const LOCKS=[
   idx:1.25},
  {id:41,t:1.5,n:"Permafrost",
   q:"Le dégel s'entretient seul : le carbone libéré réchauffe, ce qui dégèle davantage. Plus personne ne pilote ce robinet.",
-  perma:.9},
+  perma:.6},
  {id:16,t:2.0,n:"Glaciers de montagne",
   q:"Le château d'eau saisonnier de 2 milliards de personnes disparaît. La neige d'hiver ne fait plus barrage.",
   idx:1.3},
@@ -828,6 +835,7 @@ function pulse(from,dir){
 const sgn=v=>(v>0?"+":v<0?"−":"")+Math.abs(v);
 function cardTxt(n,s){
   const d=s.idx[n.id]-1;
+  if(n.vf) return {txt:n.vf(s),d};
   if(ADJ[n.id]){                       /* la carte affiche son réglage : la teinte suit le réglage */
     const a=ADJ[n.id], l=LEV[a.k], base=a.inv?100-l.def:l.def;
     return{txt:levTxt(n.id),d:a.k==="ccs"?Math.min(1,S.ccs/5):levVal(n.id)/base-1,lever:1};
@@ -869,7 +877,7 @@ function draw(s){
     `Budget 1,5 °C épuisé dans <b>${Math.round(p.budget)} ans</b>`;
   const nl=p.locked.length;
   $("h-l").innerHTML=nl?`<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="#ic-lock"/></svg>`+
-    `<span><b>${nl} seuil${nl>1?"s":""} sur ${LOCKS.length}</b> franchi${nl>1?"s":""} ici</span>`
+    `<span><b>${nl} seuil${nl>1?"s":""}</b> franchi${nl>1?"s":""} sans retour</span>`
     :`<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><use href="#ic-lock"/></svg><span>Aucun seuil franchi ici</span>`;
   $("h-l").classList.toggle("on",nl>0);
   drawOut(s);
@@ -1135,7 +1143,7 @@ function buildLockSheet(){
     <div class="kick"><svg class="ic" viewBox="0 0 24 24" width="25" height="25" aria-hidden="true"><use href="#ic-lock"/></svg>Seuils
       <button class="close" id="sh-x" aria-label="Fermer">✕</button></div>
     <h2>Ce qui ne se rouvre pas</h2>
-    <div class="val"><div class="n" style="color:${p.locked.length?"var(--warm)":"var(--ink)"}">${p.locked.length} / ${LOCKS.length}</div>
+    <div class="val"><div class="n">${p.locked.length}</div>
       <div class="c">seuils franchis par ce scénario · pic atteint +${fr(PEAK)} °C</div></div>
     <p class="desc">${p.fbWarm>.015?`Les boucles qui se sont enclenchées ajoutent à elles seules <b>+${fr(p.fbWarm,2)} °C</b> que plus personne ne pilote.<br><br>`:""}Un seuil franchi ne se rouvre pas en redescendant : la boucle qui s'est enclenchée n'a plus besoin de nous pour continuer. C'est la mémoire de cette simulation — elle retient le point le plus chaud atteint, pas celui où vous êtes maintenant.</p>
     <p class="note" style="margin:10px 0 0">Cette mémoire se garde tant que vous réglez les cartes à la main. Elle repart de zéro quand vous chargez un autre scénario, ou avec le bouton ↺.</p>
