@@ -118,7 +118,8 @@ svg#board{display:block;width:100%;height:100%}
 #tools button:active{transform:scale(.92)}
 #tools button[aria-pressed="true"]{background:var(--accent);color:#fff;box-shadow:0 0 0 .5px transparent,0 6px 20px -8px var(--accent)}
 #tour{position:fixed;left:50%;transform:translate(-50%,0);bottom:calc(22px + env(safe-area-inset-bottom,0px));
-  z-index:8;width:min(560px,calc(100vw - 32px));display:flex;gap:14px;align-items:flex-start;
+  z-index:8;width:min(470px,calc(100vw - 32px));display:flex;gap:14px;align-items:flex-start;
+  pointer-events:none;
   padding:16px 18px;border-radius:18px;background:var(--ctl);
   -webkit-backdrop-filter:blur(30px) saturate(180%);backdrop-filter:blur(30px) saturate(180%);
   box-shadow:0 0 0 .5px var(--hair),0 18px 50px -20px rgba(0,0,0,.5);
@@ -130,7 +131,7 @@ svg#board{display:block;width:100%;height:100%}
 #tour h3{font-size:15.5px;font-weight:650;margin:0 0 3px;letter-spacing:-.01em}
 #tour p{font-size:13.5px;color:var(--ink-2);margin:0;line-height:1.45}
 #tour .t-act{display:flex;gap:8px;align-items:center;flex:none;align-self:flex-end}
-#tour button{font-size:13px;font-weight:600;padding:7px 14px;border-radius:99px;cursor:pointer;color:var(--ink-2)}
+#tour button{font-size:13px;font-weight:600;padding:7px 14px;border-radius:99px;cursor:pointer;color:var(--ink-2);pointer-events:auto}
 #tour button.prim{background:var(--accent);color:#fff}
 @media (max-width:640px){#tour{flex-wrap:wrap}#tour .t-act{width:100%;justify-content:flex-end;margin-top:4px}}
 #hint{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(18px + env(safe-area-inset-bottom,0px));z-index:3;
@@ -1406,7 +1407,7 @@ const setL=o=>{Object.assign(S,o);markScen();};
 const TOUR=[
  {h:"Voici la trajectoire actuelle",
   p:"Si le monde prolonge ses politiques en place jusqu'en 2100, le thermomètre monte de +2,8 °C. Tout ce que vous voyez à gauche en découle : les espèces, la mer, les récoltes, les conflits. Et quatre seuils de bascule sont déjà franchis sur cette trajectoire.",
-  run:()=>{LEVERS.forEach(l=>S[l.k]=l.def);PEAK=0;LOCKED.clear();boot=true;markScen(0);apply(1);home();}},
+  run:()=>{LEVERS.forEach(l=>S[l.k]=l.def);PEAK=0;LOCKED.clear();boot=true;markScen(0);apply(1);}},
  {h:"Les causes se règlent sur les cartes",
   p:"Les cartes de gauche sont ce que nous faisons. Celle-ci porte un réglage : − et + sur la carte, ou le curseur dans la fiche. Montons le transport mondial de moitié.",
   run:()=>{select(4);}},
