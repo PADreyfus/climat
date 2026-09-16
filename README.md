@@ -116,6 +116,16 @@ ni adaptation, ni véritable discontinuité de bascule.
 
 Code sous [licence MIT](LICENSE).
 
+### L'atelier, à faire
+
+Ce simulateur s'inspire de l'atelier **[La Fresque du Climat](https://fresqueduclimat.org/)** :
+trois heures, en équipe, à reconstituer ces liens de cause à effet avec les cartes posées
+sur une table. **C'est une très bonne formation, et elle est vivement recommandée.** Ce
+projet ne la remplace pas — il prolonge le geste, en rendant les liens manipulables.
+Faites l'atelier.
+
+### Licence
+
 Projet personnel, **sans aucun lien avec l'association La Fresque du Climat** qui conçoit
 et anime l'atelier de cartes dont il s'inspire. Les intitulés des cartes reprennent ceux
 du jeu pour permettre de faire le lien avec l'atelier ; aucun visuel, aucune donnée et

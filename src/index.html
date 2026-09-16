@@ -105,6 +105,19 @@ svg#board{display:block;width:100%;height:100%}
 .srcgrp li{padding:10px 13px;font-size:13px;line-height:1.45;position:relative}
 .srcgrp li+li::before{content:"";position:absolute;left:13px;right:0;top:0;height:1px;background:var(--hair);transform:scaleY(.5)}
 .srcgrp li b{font-weight:650} .srcgrp li em{font-style:normal;color:var(--ink-3);display:block;font-size:12px;margin-top:1px}
+.srcgrp li a.srcl{display:inline-block;margin-top:4px;font-size:11.5px;font-weight:600;color:var(--accent);
+  text-decoration:none;word-break:break-all}
+.srcgrp li a.srcl:hover{text-decoration:underline}
+.prov{margin-top:16px;background:var(--card);border-radius:var(--r);padding:12px 13px}
+.prov h4{font-size:11px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin:0 0 7px}
+.prov .pk{font-size:12px;font-weight:650;color:var(--ink-2);margin-bottom:6px}
+.prov code{display:block;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;line-height:1.5;
+  background:var(--fill);border-radius:8px;padding:8px 10px;color:var(--ink);overflow-x:auto;white-space:pre-wrap;word-break:break-word}
+.prov p{font-size:12px;color:var(--ink-2);margin:7px 0 0;line-height:1.45}
+.prov p u{text-decoration:none;font-weight:650;color:var(--ink-2)}
+.prov p.ps{color:var(--ink-3);font-size:11.5px}
+.prov a{color:var(--accent);text-decoration:none;font-weight:600;word-break:break-all}
+.prov a:hover{text-decoration:underline}
 #hero .chip{display:inline-block;font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;
   background:var(--fill);margin-left:7px;vertical-align:3px}
 
@@ -499,7 +512,8 @@ function physics(S,L,noFb){
   const ci=(1-S.low/100)/(1-.18);
   const fossil=Math.max(0,(16*I+7*B+10*T+4*A)*ci);
   const luc=4.5*D;
-  let dT=CAL.dt,co2=CAL.co2,other=CAL.ghg,ppm=CAL.ppm,af=CAL.af,aer=1,forc=CAL.forc,perma=.5;
+  let dT=CAL.dt,co2=CAL.co2,other=CAL.ghg,aer=1,perma=.5;
+  let ppm,af,forc;                 /* réassignés à chaque tour de boucle avant d'être lus */
   for(let i=0;i<80;i++){
     const r=Math.max(0,dT/CAL.dt), r2=r*r;
     perma=Math.max(.5*r2*fb,(L.perma||0)*fb);        /* une fois le verrou fermé, le plancher reste */
@@ -822,9 +836,28 @@ NODES.forEach(n=>{
 const RM=matchMedia("(prefers-reduced-motion:reduce)").matches;
 const $=id=>document.getElementById(id);
 let cur=null,last=null,anim=0,chain=null,pulseTok=0;
+/* Référence des indices — le MÊME pipeline, curseurs au repos.
+   Sans elle, les multiplicateurs des seuils déjà franchis sur la trajectoire actuelle
+   (récifs ×1,5, calottes ×1,25, glaciers ×1,3) étaient comptés dans l'état affiché mais
+   absents de la référence : au repos, sans avoir rien touché, les cartes annonçaient
+   « +50 % biodiversité marine », « +24 % famines », « +12 % conflits ». Des artefacts
+   de normalisation, pas des prévisions.
+   Le cache dépend de showOpt, parce que compute() ignore les cartes optionnelles. */
+const REFIDX={};
+function refIdx(){
+  const k=showOpt?"opt":"base";
+  if(!REFIDX[k]){
+    const save={...S};
+    LEVERS.forEach(l=>S[l.k]=l.def);
+    REFIDX[k]=compute().idx;
+    Object.assign(S,save);
+  }
+  return REFIDX[k];
+}
 function snap(){
-  const r=compute();
-  return {p:{...r.p,locked:r.p.locked},idx:{...r.idx}};
+  const r=compute(), ref=refIdx(), idx={};
+  for(const k in r.idx) idx[k]=r.idx[k]/(ref[k]||1);
+  return {p:{...r.p,locked:r.p.locked},idx};
 }
 function lerp(a,b,t){const o={p:{},idx:{}};
   for(const k in b.p){const av=a.p[k],bv=b.p[k];
@@ -1206,6 +1239,7 @@ function buildSheet(){
     ${ins?`<div class="ghdr">Ce qui la provoque</div><div class="grp">${ins}</div>`:""}
     ${outs?`<div class="ghdr">Ce qu'elle provoque</div><div class="grp">${outs}</div>`:""}
     <div class="ghdr">Ce que ça veut dire</div><div class="mean" id="sh-mean"></div>
+    ${provHTML(n)}
     ${(n.b||n.x)?'<p class="note">Carte ajoutée en complément des 42 cartes officielles.</p>':""}`;
   SR={n:$("sh-n"),c:$("sh-c"),sl:$("sl"),slv:$("sl-v"),mean:$("sh-mean"),
       rows:[...body.querySelectorAll("[data-v]")].map(el=>({el,id:+el.dataset.v}))};
@@ -1258,25 +1292,27 @@ function buildLockSheet(){
 }
 const SOURCES=[
  {t:"Le noyau physique",l:[
-  ["Réchauffement par tonne émise","0,45 °C pour 1000 GtCO₂ · GIEC AR6, fourchette 0,27 à 0,63"],
-  ["Forçage du CO₂","5,35·ln(C/C₀) · Myhre et al., 1998"],
-  ["Émissions actuelles","37 GtCO₂ fossiles + 4,2 usage des sols · Global Carbon Budget 2024"],
-  ["Autres gaz à effet de serre","≈ 12 GtCO₂e/an · GIEC AR6 (59 GtCO₂e tous gaz confondus en 2019)"],
-  ["Part qui reste dans l'air","≈ 45 % des émissions · Global Carbon Budget"],
-  ["Masquage par les aérosols","≈ 0,4 °C de refroidissement · GIEC AR6"],
-  ["Niveau marin et pH","interpolés entre SSP1-1.9 et SSP5-8.5 · GIEC AR6"],
-  ["Budget 1,5 °C","≈ 275 GtCO₂ depuis 2025 · GIEC AR6 actualisé"]]},
+  ["Réchauffement par tonne émise","0,45 °C pour 1000 GtCO₂ · GIEC AR6, fourchette 0,27 à 0,63","https://www.ipcc.ch/report/ar6/wg1/"],
+  ["Forçage du CO₂","5,35·ln(C/C₀) · Myhre et al., 1998","https://doi.org/10.1029/98GL01908"],
+  ["Émissions actuelles","37 GtCO₂ fossiles + 4,2 usage des sols · Global Carbon Budget 2024","https://globalcarbonbudget.org/"],
+  ["Autres gaz à effet de serre","≈ 12 GtCO₂e/an · GIEC AR6 (59 GtCO₂e tous gaz confondus en 2019)","https://www.ipcc.ch/report/ar6/wg1/"],
+  ["Part qui reste dans l'air","≈ 45 % des émissions · Global Carbon Budget","https://globalcarbonbudget.org/"],
+  ["Masquage par les aérosols","≈ 0,4 °C de refroidissement · GIEC AR6","https://www.ipcc.ch/report/ar6/wg1/"],
+  ["Niveau marin et pH","interpolés entre SSP1-1.9 et SSP5-8.5 · GIEC AR6","https://www.ipcc.ch/report/ar6/wg1/"],
+  ["Budget 1,5 °C","≈ 275 GtCO₂ depuis 2025 · GIEC AR6 actualisé","https://doi.org/10.5194/essd-16-2625-2024"]]},
  {t:"Les seuils de bascule",l:[
-  ["Les six seuils","Armstrong McKay et al., Science, 2022 — valeurs centrales. Les fourchettes sont larges : 0,8 à 3 °C pour le Groenland, 1,4 à 8 °C pour l'AMOC."]]},
+  ["Les six seuils","Armstrong McKay et al., Science, 2022 — valeurs centrales. Les fourchettes sont larges : 0,8 à 3 °C pour le Groenland, 1,4 à 8 °C pour l'AMOC.","https://doi.org/10.1126/science.abn7950"]]},
  {t:"Les conséquences chiffrées",l:[
-  ["Espèces menacées d'extinction","9 % à 1,5 °C, 14 % à 2 °C, 29 % à 4 °C · GIEC AR6, groupe II"],
-  ["Population sous la ligne d'eau","Kulp & Strauss, Nature Communications, 2019 (CoastalDEM)"],
-  ["Zone climatique habitable","Xu et al., PNAS, 2020"],
-  ["Rendements céréaliers","≈ −6 %/°C sur le blé, −7 % sur le maïs · Zhao et al., PNAS, 2017"],
-  ["Récifs coralliens","70 à 90 % perdus à 1,5 °C, plus de 99 % à 2 °C · GIEC SR1.5"],
-  ["Déplacements de populations","216 millions d'ici 2050 · Banque mondiale, Groundswell, 2021"],
-  ["Pollution de l'air","≈ 4 millions de morts prématurées par an · OMS"],
-  ["Ville analogue","méthode maison : moyenne annuelle de la ville + réchauffement local. Inspirée de Bastin et al., PLOS One, 2019"]]},
+  ["Espèces menacées d'extinction","9 % à 1,5 °C, 14 % à 2 °C, 29 % à 4 °C · GIEC AR6, groupe II","https://www.ipcc.ch/report/ar6/wg2/"],
+  ["Population sous la ligne d'eau","Kulp & Strauss, Nature Communications, 2019 (CoastalDEM)","https://doi.org/10.1038/s41467-019-12808-z"],
+  ["Zone climatique habitable","Xu et al., PNAS, 2020","https://doi.org/10.1073/pnas.1910114117"],
+  ["Rendements céréaliers","≈ −6 %/°C sur le blé, −7 % sur le maïs · Zhao et al., PNAS, 2017","https://doi.org/10.1073/pnas.1701762114"],
+  ["Récifs coralliens","70 à 90 % perdus à 1,5 °C, plus de 99 % à 2 °C · GIEC SR1.5","https://www.ipcc.ch/sr15/"],
+  ["Déplacements de populations","216 millions d'ici 2050 · Banque mondiale, Groundswell, 2021","https://www.worldbank.org/en/news/press-release/2021/09/13/climate-change-could-force-216-million-people-to-migrate-within-their-own-countries-by-2050"],
+  ["Pollution de l'air","≈ 4 millions de morts prématurées par an · OMS","https://www.who.int/news-room/fact-sheets/detail/ambient-(outdoor)-air-quality-and-health"],
+  ["Ville analogue","méthode maison : moyenne annuelle de la ville + réchauffement local. Inspirée de Bastin et al., PLOS One, 2019","https://doi.org/10.1371/journal.pone.0217592"]]},
+ {t:"Aller plus loin",l:[
+  ["L'atelier La Fresque du Climat","Trois heures, en équipe, à reconstituer ces liens de cause à effet avec les cartes sur une table. C'est une très bonne formation, et elle est vivement recommandée : ce simulateur ne la remplace pas, il prolonge le geste. Projet sans aucun lien avec l'association qui la conçoit et l'anime.","https://fresqueduclimat.org/"]]},
  {t:"Ce qui n'est pas sourcé",l:[
   ["Le poids des flèches","de 0,3 à 1 — des jugements d'auteur sur l'importance relative de chaque cause, pas des coefficients mesurés."],
   ["Les exposants de non-linéarité","2,2 pour les canicules, 2,0 pour les incendies… Ils traduisent un fait réel (les extrêmes réagissent plus que la moyenne) sous une forme choisie."],
@@ -1284,13 +1320,67 @@ const SOURCES=[
   ["Les multiplicateurs des verrous","ils traduisent « cet élément reste durablement aggravé », pas une amplitude mesurée."],
   ["La répartition sectorielle","16 / 7 / 10 / 4 GtCO₂ par usage final : un partage cohérent avec les inventaires, mais un partage."]]}
 ];
+const srcHost=u=>u.startsWith("https://doi.org/")?"doi:"+u.slice(16)
+  :u.replace(/^https:\/\/(www\.)?/,"").split("/")[0];
+
+/* ============================================================
+   PROVENANCE — d'où sort le chiffre de CETTE carte.
+   Dérivée du modèle lui-même (équation d'ancrage, ou parents/poids/γ réels),
+   pour qu'elle ne puisse pas se désynchroniser du calcul.
+   ============================================================ */
+const U_AR6="https://www.ipcc.ch/report/ar6/wg1/",
+      U_GCB="https://globalcarbonbudget.org/",
+      U_MYH="https://doi.org/10.1029/98GL01908",
+      U_AMK="https://doi.org/10.1126/science.abn7950";
+const ANCHOR_SRC={
+ co2 :["CO₂ = fossile + usage des sols + rétroactions − captage","Global Carbon Budget",U_GCB],
+ ghg :["autres GES = 8·A + 2,5·aérosols + 1,5·I + 0,3·r²","GIEC AR6",U_AR6],
+ sink:["AF = 0,45 / puits × (1 + 0,12·(CO₂/41,5 − 1))","Global Carbon Budget",U_GCB],
+ ppm :["ppm = 420 + AF · cumul / 7,8   —   7,8 GtCO₂ par ppm","GIEC AR6",U_AR6],
+ ph  :["pH = 8,05 − 0,000462·(ppm − 420)","interpolé entre SSP1-2.6 et SSP5-8.5 · GIEC AR6",U_AR6],
+ forc:["F = 5,35·ln(ppm/278) + 0,9·autres − aérosols + 0,2·albédo","Myhre et al., 1998",U_MYH],
+ ener:["déséquilibre énergétique = 0,25 · F","GIEC AR6",U_AR6],
+ dt  :["ΔT = 1,4 + 0,45·cumul/1000 + 0,35·autres − 0,4·aérosols","TCRE 0,45 °C/1000 GtCO₂ · GIEC AR6",U_AR6],
+ dtw :["ΔT sur les terres ≈ 0,8 · ΔT global","GIEC AR6",U_AR6],
+ slr :["mer = 0,21 + 0,133 · ΔT","interpolé entre SSP1-1.9 et SSP5-8.5 · GIEC AR6",U_AR6]
+};
+const FIXEDN={1:"somme des quatre secteurs d'activité",5:"fossile / 37 GtCO₂",
+  43:"part du bas-carbone / 18 %",44:"référence",45:"capacité des puits",46:"captage et stockage"};
+function provHTML(n){
+  const A=ANCHOR_SRC[n.anchor];
+  let kind,eq,src=null,url=null,extra="";
+  if(A){ kind="Grandeur physique, calculée"; eq=A[0]; src=A[1]; url=A[2]; }
+  else if(ADJ[n.id]){ kind="Réglage"; eq="valeur lue directement sur le curseur de cette carte";
+    src="inventaires · Global Carbon Budget"; url=U_GCB; }
+  else if(FIXEDN[n.id]||LEVERNODE[n.id]){ kind="Dérivée des réglages";
+    eq=FIXEDN[n.id]||("réglage « "+LEV[LEVERNODE[n.id]].n+" »"); }
+  else {
+    const ps=IN[n.id].filter(e=>!e.fb&&byId[e.a]&&(showOpt||!(e.B||byId[e.a].b)));
+    kind="Indice relatif, propagé";
+    eq="indice = ( Σ poids × amont ⁄ Σ poids )"+(n.g&&n.g!==1?" ^ "+fr(n.g,1):"");
+    extra=ps.length?"<u>Amont pris en compte</u> "+ps.map(e=>esc(byId[e.a].n)+" ×"+fr(e.w||1,1)).join(" · ")
+                   :"<u>Aucune carte en amont.</u>";
+    if(n.g&&n.g!==1) extra+="<br><u>Exposant γ = "+fr(n.g,1)+"</u> : les extrêmes réagissent plus que la moyenne. Choix d'auteur, pas une mesure.";
+    extra+="<br><u>Pas de source externe</u> : ce chiffre est <b>ordinal</b>. Il classe correctement cette carte par rapport aux autres ; il ne se lit pas comme une mesure. Les poids sont des jugements d'auteur.";
+  }
+  const lk=LOCKS.find(l=>l.id===n.id);
+  if(lk) extra+=(extra?"<br>":"")+"<u>Seuil de bascule à +"+fr(lk.t,1)+" °C</u> — Armstrong McKay et al., Science 2022. "+
+    (lk.idx?"Au-delà, l'indice est multiplié par "+fr(lk.idx,2)+".":"Au-delà, un plancher s'applique dans le noyau physique.");
+  return `<div class="prov"><h4>D'où vient ce chiffre</h4>
+    <div class="pk">${kind}</div>
+    <code>${esc(eq)}</code>
+    ${extra?`<p>${extra}</p>`:""}
+    ${src?`<p class="ps">${esc(src)}${url?` · <a href="${url}" target="_blank" rel="noopener noreferrer">${srcHost(url)} ↗</a>`:""}</p>`:""}
+    ${lk?`<p class="ps"><a href="${U_AMK}" target="_blank" rel="noopener noreferrer">${srcHost(U_AMK)} ↗</a></p>`:""}</div>`;
+}
+
 function buildSourcesSheet(){
   body.innerHTML=`
     <div class="kick">Méthode<button class="close" id="sh-x" aria-label="Fermer">✕</button></div>
     <h2>D'où viennent ces chiffres</h2>
     <p class="desc">Ce simulateur est un outil pédagogique, pas un modèle climatique. Les grandeurs physiques sont des ordres de grandeur défendables ; les pourcentages sur les cartes de conséquences sont ordinaux — ils classent correctement les réactions les unes par rapport aux autres, ils ne se lisent pas comme des mesures.</p>`+
     SOURCES.map(g=>`<div class="srcgrp"><h4>${g.t}</h4><ul>`+
-      g.l.map(([a,b])=>`<li><b>${a}</b><em>${b}</em></li>`).join("")+`</ul></div>`).join("");
+      g.l.map(([a,b,u])=>`<li><b>${a}</b><em>${b}</em>${u?`<a class="srcl" href="${u}" target="_blank" rel="noopener noreferrer">${srcHost(u)} ↗</a>`:""}</li>`).join("")+`</ul></div>`).join("");
   $("sh-x").onclick=close;
 }
 function openSources(){

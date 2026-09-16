@@ -76,14 +76,24 @@ Tous les curseurs au repos, le modèle donne :
 |---|---|---|
 | Réchauffement 2100 | +2,79 °C | politiques actuelles : ≈ +2,7 °C |
 | CO₂ atmosphérique | 605 ppm | SSP2-4.5 : ≈ 600 ppm |
-| Émissions | 42,6 GtCO₂/an | 41,5 anthropiques + rétroactions |
+| Émissions | 42,7 GtCO₂/an | 41,5 anthropiques + rétroactions |
 | Niveau marin | +58 cm | SSP2-4.5 : ≈ 55 cm |
 | pH de l'océan | 7,96 | ≈ 8,05 aujourd'hui |
-| Budget 1,5 °C | 6 ans | épuisé vers 2030 |
+| Budget 1,5 °C | 6,4 ans | épuisé vers 2031 |
 
-C'est cet état qui sert de **référence** : tous les pourcentages du graphe s'y
-comparent, et il est recalculé au chargement plutôt que codé en dur, pour que l'écart
-affiché soit exactement nul quand on ne touche à rien.
+C'est cet état qui sert de **référence** : tous les pourcentages du graphe s'y comparent,
+et il est recalculé au chargement plutôt que codé en dur, pour que l'écart affiché soit
+exactement nul quand on ne touche à rien.
+
+La référence doit traverser **le même pipeline que l'état affiché** — `refIdx()` rejoue
+`compute()` curseurs au repos, et chaque indice est divisé par le sien. Ce n'est pas un
+détail : sur la trajectoire actuelle (+2,79 °C), quatre seuils de bascule sont déjà
+franchis, et leurs multiplicateurs (récifs ×1,5, calottes ×1,25, glaciers ×1,3)
+s'appliquent à l'état affiché. Tant que la référence était calculée sans eux, l'écart
+n'était pas nul au repos : les cartes annonçaient « +50 % biodiversité marine », « +24 %
+famines », « +12 % conflits armés » **sans qu'on ait touché à quoi que ce soit**. C'étaient
+des artefacts de normalisation, pas des prévisions. Vérification : au repos, les 52 cartes
+affichent exactement 0 %.
 
 ---
 
@@ -179,3 +189,53 @@ sont déjà traitées dans la physique.
 
 En atelier, le premier usage honnête de cet outil est de faire sentir des ordres de
 grandeur et des enchaînements — pas de produire des chiffres à citer.
+
+---
+
+## 5. Sources
+
+Tous les liens ci-dessous ont été vérifiés (code HTTP 200 ou redirection DOI valide).
+
+### Le noyau physique
+
+| Élément du modèle | Source | Lien |
+|---|---|---|
+| TCRE — 0,45 °C par 1000 GtCO₂ | GIEC AR6, groupe I. Valeur centrale 1,65 °C/1000 PgC, soit 0,45 après conversion (1 PgC = 3,664 GtCO₂) ; fourchette 1,0–2,3 → 0,27–0,63 | <https://www.ipcc.ch/report/ar6/wg1/> |
+| Forçage du CO₂ — 5,35·ln(C/C₀) | Myhre, Highwood, Shine & Stordal, *GRL*, 1998 | <https://doi.org/10.1029/98GL01908> |
+| Émissions fossiles et usage des sols | Global Carbon Budget | <https://globalcarbonbudget.org/> |
+| Fraction restant dans l'air (≈ 45 %) | Global Carbon Budget | <https://globalcarbonbudget.org/> |
+| Masse par ppm — 7,8 GtCO₂ | 2,124 GtC/ppm × 44/12 = 7,79 | — |
+| Aérosols, niveau marin, pH, autres GES | GIEC AR6, groupe I | <https://www.ipcc.ch/report/ar6/wg1/> |
+| Budget 1,5 °C restant | Forster *et al.*, *ESSD*, 2024 — *Indicators of Global Climate Change* | <https://doi.org/10.5194/essd-16-2625-2024> |
+
+### Les seuils de bascule
+
+| Élément | Source | Lien |
+|---|---|---|
+| Les six seuils et leurs fourchettes | Armstrong McKay *et al.*, *Science*, 2022 | <https://doi.org/10.1126/science.abn7950> |
+
+### Les conséquences chiffrées
+
+| Élément | Source | Lien |
+|---|---|---|
+| Espèces menacées d'extinction | GIEC AR6, groupe II | <https://www.ipcc.ch/report/ar6/wg2/> |
+| Population sous la ligne d'eau (CoastalDEM) | Kulp & Strauss, *Nature Communications*, 2019 | <https://doi.org/10.1038/s41467-019-12808-z> |
+| Zone climatique habitable | Xu *et al.*, *PNAS*, 2020 | <https://doi.org/10.1073/pnas.1910114117> |
+| Rendements céréaliers | Zhao *et al.*, *PNAS*, 2017 | <https://doi.org/10.1073/pnas.1701762114> |
+| Récifs coralliens | GIEC SR1.5 | <https://www.ipcc.ch/sr15/> |
+| Déplacements de populations | Banque mondiale, *Groundswell*, 2021 | <https://www.worldbank.org/en/news/press-release/2021/09/13/climate-change-could-force-216-million-people-to-migrate-within-their-own-countries-by-2050> |
+| Pollution de l'air | OMS | <https://www.who.int/news-room/fact-sheets/detail/ambient-(outdoor)-air-quality-and-health> |
+| Ville analogue (méthode inspirée de) | Bastin *et al.*, *PLOS One*, 2019 | <https://doi.org/10.1371/journal.pone.0217592> |
+
+### Ce qui n'a pas de source
+
+Les poids des flèches (0,3 à 1), les exposants `γ`, les paramétrisations des rétroactions
+et les multiplicateurs des seuils sont des **choix d'auteur**. Ils sont cohérents avec les
+ordres de grandeur publiés, ils ne sont tirés d'aucun d'entre eux. Chaque carte le dit
+elle-même, dans son bloc « D'où vient ce chiffre ».
+
+### L'atelier
+
+Ce simulateur prolonge l'atelier **[La Fresque du Climat](https://fresqueduclimat.org/)** —
+une très bonne formation, vivement recommandée, qu'il ne remplace pas. Projet sans aucun
+lien avec l'association.
