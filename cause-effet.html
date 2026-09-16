@@ -168,6 +168,7 @@ svg#board{display:block;width:100%;height:100%}
 .row .rt{font-size:14px;font-weight:600;line-height:1.25;min-width:0}
 .row .rt em{display:block;font-style:normal;font-size:12.5px;font-weight:400;color:var(--ink-3);margin-top:1px}
 .row .rv{margin-left:auto;font-size:13px;font-weight:600;flex:none}
+.row .rv i{font-style:normal;font-size:11px;font-weight:500;color:var(--ink-3)}
 .row .cv{color:var(--ink-3);font-size:16px;flex:none;margin-left:2px}
 /* curseur de la fiche */
 .mean{background:var(--card);border-radius:var(--r);padding:13px 15px;font-size:14px;line-height:1.5;color:var(--ink-2)}
@@ -195,6 +196,7 @@ svg .ic{color:var(--ink-3)}
 .card.sel .ic{color:var(--ink-2)}
 .card text.t{font-size:13.5px;font-weight:600;fill:var(--ink);letter-spacing:-.006em}
 .card text.v{font-size:12.5px;font-weight:600}
+.card text.v tspan.qu{font-size:10px;font-weight:500;fill:var(--ink-3)}
 .card.sel rect.bg{stroke:var(--accent);stroke-width:2}
 .card.dim{opacity:.26}
 .card,.edge{transition:opacity .28s var(--ease)}
@@ -276,10 +278,10 @@ const NODES = [
 {id:13,f:"atm",L:6,R:2,n:"Effet de serre additionnel",m:"effet de serre additionnel",d:"Les molécules à 3 atomes ou plus absorbent l'infrarouge que la Terre réémet. Sans effet de serre naturel : −18 °C. Ce que nous ajoutons s'empile par-dessus."},
 {id:23,f:"eco",L:6,R:5,n:"Problèmes de calcification",m:"difficulté à calcifier",d:"L'acidification consomme les ions carbonate dont coquilles et squelettes calcaires sont faits. Construire sa coquille coûte de plus en plus d'énergie."},
 {id:15,f:"phy",L:7,R:2,n:"Forçage radiatif",m:"forçage radiatif",d:"Le déséquilibre imposé au système climatique, en W/m². ≈ +2,7 W/m² aujourd'hui, GES moins aérosols. Étendu à la planète, cela équivaut à plusieurs bombes d'Hiroshima par seconde.",anchor:"forc"},
-{id:29,f:"eco",L:7,R:5,n:"Ptéropodes et coccolithophores",m:"déclin du plancton calcaire",d:"Papillons de mer et micro-algues à coque calcaire : base des réseaux trophiques marins et acteurs majeurs de la pompe biologique de carbone."},
+{id:29,f:"eco",L:7,R:5,u:"déclin",n:"Ptéropodes et coccolithophores",m:"déclin du plancton calcaire",d:"Papillons de mer et micro-algues à coque calcaire : base des réseaux trophiques marins et acteurs majeurs de la pompe biologique de carbone."},
 {id:14,f:"phy",L:8,R:2,n:"Bilan énergétique",m:"énergie accumulée",d:"L'énergie piégée se répartit : 91 % dans l'océan, 5 % dans les sols, 3 % dans la fonte des glaces, 1 % dans l'atmosphère. Tout le reste de la fresque découle de cette répartition.",anchor:"forc"},
 {id:21,f:"phy",L:9,R:1,n:"Hausse de la température",m:"réchauffement en 2100",d:"≈ +1,3 °C au-dessus de 1850-1900 aujourd'hui. Chaque tranche de 1000 GtCO₂ émises ajoute ≈ 0,45 °C, quasi linéairement.",anchor:"dt"},
-{id:17,f:"phy",L:9,R:3,n:"Hausse de la température de l'eau",m:"réchauffement de l'océan",d:"L'océan encaisse 91 % de l'excès d'énergie. Il se dilate, stratifie, perd son oxygène et alimente les cyclones.",anchor:"dt"},
+{id:17,f:"phy",L:9,R:3,n:"Hausse de la température de l'eau",m:"réchauffement de l'océan",d:"L'océan encaisse 91 % de l'excès d'énergie. Il se dilate, stratifie, perd son oxygène et alimente les cyclones.",anchor:"dtw"},
 {id:18,f:"phy",L:9,R:5,n:"Fonte de la banquise",m:"perte de banquise",d:"La banquise arctique d'été a perdu ≈ 40 % de sa surface depuis 1979. Elle flotte : sa fonte n'élève pas le niveau marin, mais elle remplace un miroir blanc par un océan sombre."},
 {id:16,f:"phy",L:9,R:6,n:"Fonte des glaciers",m:"perte des glaciers",d:"Les glaciers de montagne perdent ≈ 270 Gt/an. Châteaux d'eau des Andes, de l'Himalaya et des Alpes, ils régulent le débit d'été de fleuves qui alimentent des milliards de personnes."},
 {id:19,f:"phy",L:9,R:7,n:"Fonte des calottes glaciaires",m:"perte des calottes",d:"Groenland : +7 m de niveau marin potentiel. Antarctique : +54 m. Elles fondent lentement mais leur engagement se joue à quelques dixièmes de degré près."},
@@ -287,18 +289,18 @@ const NODES = [
 {id:36,f:"phy",L:10,R:1,n:"Canicules",m:"intensité des canicules",d:"L'événement climatique le plus directement lié au réchauffement moyen : un décalage de la courbe de +1 °C multiplie par 5 à 10 la fréquence des extrêmes chauds.",g:2.2},
 {id:28,f:"eco",L:10,R:2,n:"Vecteurs de maladie",m:"extension des vecteurs",d:"Moustiques (dengue, paludisme, chikungunya), tiques : la température conditionne leur aire de répartition et la vitesse de réplication des virus qu'ils portent."},
 {id:20,f:"phy",L:10,R:3,n:"Perturbation du cycle de l'eau",m:"intensité du cycle de l'eau",d:"+7 % de vapeur d'eau dans l'air par degré (Clausius-Clapeyron). L'atmosphère assèche plus vite là où il ne pleut pas, et déverse plus fort là où il pleut.",g:1.2},
-{id:25,f:"eco",L:10,R:4,n:"Biodiversité terrestre",m:"pression sur les espèces",d:"Les espèces doivent migrer de ≈ 5 km/an vers les pôles ou de 5 m/an en altitude pour rester dans leur niche climatique. Beaucoup ne le peuvent pas."},
+{id:25,f:"eco",L:10,R:4,u:"pression",n:"Biodiversité terrestre",m:"pression sur les espèces",d:"Les espèces doivent migrer de ≈ 5 km/an vers les pôles ou de 5 m/an en altitude pour rester dans leur niche climatique. Beaucoup ne le peuvent pas."},
 {id:34,f:"phy",L:10,R:5,n:"Cyclones",m:"intensité des cyclones",d:"Leur nombre ne devrait pas augmenter, mais leur intensité oui : l'énergie vient de la chaleur de l'océan de surface, et les précipitations associées grimpent avec la vapeur d'eau.",g:1.4},
-{id:27,f:"eco",L:10,R:6,n:"Biodiversité marine",m:"pression sur le vivant marin",d:"Triple peine : eau plus chaude, plus acide, moins oxygénée. Les coraux, qui abritent 25 % des espèces marines, blanchissent dès +1,5 °C.",g:1.5},
+{id:27,f:"eco",L:10,R:6,u:"pression",n:"Biodiversité marine",m:"pression sur le vivant marin",d:"Triple peine : eau plus chaude, plus acide, moins oxygénée. Les coraux, qui abritent 25 % des espèces marines, blanchissent dès +1,5 °C.",g:1.5},
 {id:22,f:"phy",L:10,R:7,n:"Montée des eaux",m:"niveau marin en 2100",d:"Deux tiers de dilatation thermique, un tiers de fonte terrestre. +20 cm depuis 1900, et un engagement de plusieurs mètres sur les siècles à venir.",anchor:"slr"},
 {id:35,f:"phy",L:11,R:0,n:"Incendies",m:"risque d'incendie",d:"Chaleur, sécheresse et vent allongent la saison des feux. Les mégafeux relâchent le carbone des forêts : encore une rétroaction positive.",g:2.0},
 {id:30,f:"phy",L:11,R:1,n:"Sécheresses",m:"intensité des sécheresses",d:"Moins de pluie par endroits, mais surtout plus d'évaporation partout : les sols s'assèchent même à pluviométrie constante.",g:1.7},
 {id:26,f:"phy",L:11,R:2,n:"Crues",m:"intensité des crues",d:"Pluies plus intenses sur sols secs et imperméabilisés. Les épisodes cévenols ou les moussons extrêmes gagnent ≈ 7 % d'eau par degré.",g:1.5},
-{id:31,f:"eco",L:11,R:3,n:"Ressources en eau douce",m:"tension sur l'eau douce",d:"Glaciers qui disparaissent, nappes qui ne se rechargent plus, neige qui tombe en pluie : le stock saisonnier gratuit s'évapore. 2 milliards de personnes déjà en stress hydrique."},
+{id:31,f:"eco",L:11,R:3,u:"tension",n:"Ressources en eau douce",m:"tension sur l'eau douce",d:"Glaciers qui disparaissent, nappes qui ne se rechargent plus, neige qui tombe en pluie : le stock saisonnier gratuit s'évapore. 2 milliards de personnes déjà en stress hydrique."},
 {id:33,f:"hum",L:11,R:7,n:"Submersions",m:"exposition à la submersion",d:"≈ 900 millions de personnes vivent à moins de 10 m au-dessus du niveau marin. Ce n'est pas la moyenne qui noie, mais la tempête posée dessus.",g:1.8},
 {id:32,f:"eco",L:12,R:2,n:"Baisse des rendements agricoles",m:"perte de rendement",d:"Au-delà de +1,5 °C, les gains des hautes latitudes ne compensent plus les pertes tropicales. Blé, maïs et riz perdent ≈ 6 à 7 % de rendement par degré."},
 {id:37,f:"hum",L:13,R:1,n:"Famines",m:"risque de famine",d:"La production mondiale ne manque pas encore : ce sont les chocs simultanés sur plusieurs greniers, et les prix qui s'envolent, qui affament."},
-{id:38,f:"hum",L:13,R:3,n:"Santé humaine",m:"atteinte à la santé",d:"Chaleur, maladies vectorielles, malnutrition, pollution, santé mentale. L'OMS estime le climat comme la première menace sanitaire du XXIᵉ siècle."},
+{id:38,f:"hum",L:13,R:3,u:"atteinte",n:"Santé humaine",m:"atteinte à la santé",d:"Chaleur, maladies vectorielles, malnutrition, pollution, santé mentale. L'OMS estime le climat comme la première menace sanitaire du XXIᵉ siècle."},
 {id:39,f:"hum",L:13,R:5,n:"Déplacement de populations",m:"déplacements",d:"L'essentiel des mouvements est interne et régional, pas transcontinental. Ce sont les plus pauvres qui se déplacent le moins et encaissent le plus."},
 {id:42,f:"hum",L:14,R:2,n:"Accroissement des inégalités",m:"creusement des inégalités",d:"Les 10 % les plus riches émettent la moitié du CO₂ ; les 50 % les plus pauvres en émettent 12 % et subissent le plus d'impacts. Le climat amplifie les écarts existants."},
 {id:40,f:"hum",L:14,R:4,n:"Conflits armés",m:"risque de conflit",d:"Le climat est un multiplicateur de menace : il agit sur des tensions préexistantes (eau, terres, prix alimentaires) plutôt qu'il ne crée les conflits de toutes pièces."},
@@ -309,9 +311,9 @@ const NODES = [
 {id:45,f:"eco",L:3,R:6,n:"Reforestation et sols",b:1,m:"puits ajoutés",d:"Restaurer forêts, mangroves, tourbières et carbone des sols. Puissant mais lent, saturable et réversible : un complément, jamais un substitut à la baisse des émissions."},
 {id:46,f:"ene",L:2,R:0,n:"Captage et stockage du CO₂",b:1,m:"CO₂ capté",d:"≈ 50 MtCO₂/an captés aujourd'hui, soit 0,1 % des émissions. Tous les scénarios 1,5 °C du GIEC en supposent des gigatonnes : un pari technologique non tenu à ce jour.",anchor:"ccs"},
 {id:49,f:"hum",L:4,R:0,n:"Pollution de l'air",x:1,m:"mortalité liée à l'air",d:"Les mêmes aérosols qui refroidissent la planète tuent ≈ 4 millions de personnes par an. Le co-bénéfice santé de la sortie des fossiles est immédiat et local."},
-{id:47,f:"phy",L:11,R:5,n:"Circulation océanique (AMOC)",x:1,m:"affaiblissement de l'AMOC",d:"L'eau douce de fonte freine la plongée d'eau dense au large du Groenland. Un ralentissement marqué refroidirait l'Europe du Nord tout en déplaçant les moussons : point de bascule à basse probabilité, impact énorme.",g:1.6},
+{id:47,f:"phy",L:11,R:5,u:"faiblesse",n:"Circulation océanique (AMOC)",x:1,m:"affaiblissement de l'AMOC",d:"L'eau douce de fonte freine la plongée d'eau dense au large du Groenland. Un ralentissement marqué refroidirait l'Europe du Nord tout en déplaçant les moussons : point de bascule à basse probabilité, impact énorme.",g:1.6},
 {id:48,f:"eco",L:12,R:5,n:"Dépérissement de l'Amazonie",x:1,m:"risque de bascule",d:"Entre 20 et 25 % de déforestation, la forêt ne recycle plus assez d'humidité et bascule vers la savane, relâchant des dizaines de GtC. On est à ≈ 17 %.",g:2.0},
-{id:50,f:"eco",L:12,R:6,n:"Ressources halieutiques",x:1,m:"perte de pêche",d:"3 milliards de personnes tirent 20 % de leurs protéines animales de la mer. Les stocks migrent vers les pôles et le potentiel de capture tropical chute de 40 % à +3 °C."},
+{id:50,f:"eco",L:12,R:6,u:"perte",n:"Ressources halieutiques",x:1,m:"perte de pêche",d:"3 milliards de personnes tirent 20 % de leurs protéines animales de la mer. Les stocks migrent vers les pôles et le potentiel de capture tropical chute de 40 % à +3 °C."},
 {id:52,f:"hum",L:12,R:0,n:"Stress thermique au travail",b:1,m:"heures de travail perdues",d:"Au-delà de 35 °C de température humide, le corps ne peut plus se refroidir. Des centaines de milliards d'heures de travail agricole et de BTP sont déjà perdues chaque année.",g:2.2},
 {id:51,f:"hum",L:14,R:6,n:"Coût économique et assurances",x:1,m:"coût des dommages",d:"≈ 250 Md$ de dommages climatiques par an. Là où le risque devient inassurable, la valeur immobilière s'effondre avant que l'eau n'arrive."}
 ];
@@ -485,13 +487,14 @@ const REF=(function(){const d={};LEVERS.forEach(l=>d[l.k]=l.def);const p=physics
 const fr=(v,d=1)=>v.toLocaleString("fr-FR",{minimumFractionDigits:d,maximumFractionDigits:d});
 const ANCHOR={
  co2 :p=>({i:p.co2/REF.co2,      v:fr(p.co2)+" Gt/an"}),
- ghg :p=>({i:p.other/REF.ghg,    v:fr(p.other)+" GtCO₂e"}),
+ ghg :p=>({i:p.other/REF.ghg,    v:fr(p.other)+" GtCO₂e/an"}),
  sink:p=>({i:p.sinkflux/REF.sinkflux, v:Math.round((1-p.af)*100)+" % absorbés"}),
  ppm :p=>({i:(p.ppm-280)/(REF.ppm-280), v:Math.round(p.ppm)+" ppm"}),
- ph  :p=>({i:Math.max(0,(8.05-p.ph)/(8.05-REF.ph)), v:fr(p.ph,2)+" pH"}),
+ ph  :p=>({i:Math.max(0,(8.05-p.ph)/(8.05-REF.ph)), v:"pH "+fr(p.ph,2)}),
  forc:p=>({i:p.forc/REF.forc,    v:fr(p.forc)+" W/m²"}),
  ener:p=>({i:p.forc/REF.forc,    v:Math.round(p.imbalance*16)+" ZJ/an"}),
  dt  :p=>({i:p.dT/REF.dt,        v:"+"+fr(p.dT)+" °C"}),
+ dtw :p=>({i:p.dT/REF.dt,        v:"+"+fr(p.dT*.8)+" °C"}),
  slr :p=>({i:p.slr/REF.slr,      v:"+"+Math.round(p.slr*100)+" cm"}),
  lowc:(p,S)=>({i:S.low/18,       v:S.low+" %"}),
  ccs :(p,S)=>({i:1+S.ccs*2,      v:fr(S.ccs)+" Gt/an"})
@@ -518,7 +521,7 @@ const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const levVal=id=>{const a=ADJ[id];return a.inv?100-S[a.k]:S[a.k];};
 const levSet=(id,v)=>{const a=ADJ[id],l=LEV[a.k];
   S[a.k]=a.inv?clamp(100-v,l.min,l.max):clamp(v,l.min,l.max);};
-const levTxt=id=>ADJ[id].k==="ccs"?fr(S.ccs,1)+" Gt":Math.round(levVal(id))+" %";
+const levTxt=id=>ADJ[id].k==="ccs"?fr(S.ccs,1)+" Gt/an":Math.round(levVal(id))+" %";
 const levStep=id=>ADJ[id].k==="ccs"?1:10;
 
 let PEAK=0;                                   /* ΔT le plus haut atteint dans la session */
@@ -860,7 +863,9 @@ function draw(s){
       c.fld.style.display=on?"none":""; c.stp.style.display=on?"":"none";
       c.fv.textContent=txt; c.sv.textContent=txt;
     }else{
-      c.v.textContent=txt;
+      c.v.textContent="";
+      if(n.u&&txt){const q=el("tspan",{class:"qu"});q.textContent=n.u+" ";c.v.appendChild(q);}
+      c.v.appendChild(document.createTextNode(txt));
       c.v.style.fill=tone(n.id,d)||"var(--ink-3)";
     }
     c.tint.setAttribute("fill",tone(n.id,d)||"var(--cool)");
@@ -984,7 +989,7 @@ const DYN={
  12:s=>`Les puits absorbent ${Math.round((1-s.p.af)*100)} % des émissions, soit ${fr(s.p.sinkflux)} Gt par an. Sans eux, la concentration monterait deux fois plus vite.`,
  14:s=>`≈ ${Math.round(s.p.imbalance*16)} zettajoules accumulés par an, soit l'équivalent de ${Math.round(s.p.imbalance*5.1e14/63e12)} bombes d'Hiroshima par seconde, en continu.`,
  15:s=>`${fr(s.p.forc)} W/m² : multiplié par la surface du globe, c'est ${Math.round(s.p.forc*5.1e14/1e12)} térawatts injectés en permanence — mille fois la puissance électrique mondiale.`,
- 17:s=>`+${fr(s.p.dT)} °C en moyenne mondiale : l'océan de surface se réchauffe un peu moins, mais il ne redescendra pas avant des siècles.`,
+ 17:s=>`≈ +${fr(s.p.dT*.8)} °C en surface, pour +${fr(s.p.dT)} °C de moyenne mondiale : l'océan encaisse plus d'énergie mais se réchauffe plus lentement que les terres — et il ne redescendra pas avant des siècles.`,
  21:s=>{const r=retour(s.p.dT);
    return `Sur les terres françaises, cela fait ≈ +${fr(s.p.dT*1.4)} °C, et ≈ +${fr(s.p.dT*2.5)} °C en Arctique.<br><br>`+
    `Un été aussi chaud que le plus chaud de 1900 revenait alors une année sur 44. Dans ce scénario : `+
@@ -1127,11 +1132,12 @@ function refreshSheet(){
   const col=tone(sel,A?cardTxt(n,s).d:d)||"var(--ink)";
   SR.n.textContent=a?a.v:(A?levTxt(sel):sgn(Math.round(d*100))+" %");
   SR.n.style.color=a||!A?col:"var(--ink)";
-  SR.c.textContent=(a||A?n.m+" · ":"")+(Math.abs(d)<.005?"au niveau de la trajectoire actuelle":sgn(Math.round(d*100))+" % vs trajectoire actuelle");
+  SR.c.textContent=n.m+" · "+(Math.abs(d)<.005?"au niveau de la trajectoire actuelle":sgn(Math.round(d*100))+" % vs trajectoire actuelle");
   if(SR.sl){SR.sl.value=levVal(sel);SR.slv.textContent=levTxt(sel);}
   if(SR.mean)SR.mean.innerHTML=meaning(sel,s);
-  SR.rows.forEach(r=>{const dv=s.idx[r.id]-1;
-    r.el.textContent=Math.abs(dv)<.005?"":sgn(Math.round(dv*100))+" %";
+  SR.rows.forEach(r=>{const dv=s.idx[r.id]-1, u=byId[r.id].u;
+    const txt=Math.abs(dv)<.005?"":sgn(Math.round(dv*100))+" %";
+    r.el.innerHTML=(u&&txt?`<i>${u}</i> `:"")+txt;
     r.el.style.color=tone(r.id,dv)||"var(--ink-3)";});
 }
 let mode="card";
